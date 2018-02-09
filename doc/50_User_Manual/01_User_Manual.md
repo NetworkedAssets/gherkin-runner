@@ -2,7 +2,7 @@
 
 ## 1. Dependency
 
-To start using Gherkin Runner just add following dependency:
+To start using Gherkin Runner add Groovy to your project and following GR dependency:
 
 Gradle: 
 
