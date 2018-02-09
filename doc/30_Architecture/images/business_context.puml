@@ -1,0 +1,21 @@
+@startuml
+sprite $aComponent jar:archimate/application-component
+
+skinparam rectangle {
+    roundCorner<<Concept>> 25
+}
+
+actor "Tests developer" as td
+
+rectangle "Tests implementations" as tests
+rectangle "GherkinRunner" as gr #A9DCDF
+file "GherkinFiles" as gf
+artifact "Reports" as reports
+
+td -down-> tests: implements
+td -down-> gr: starts
+gr --> tests: runs
+gr -down-> reports: produces
+gr -left-> gf: looks for
+
+@enduml

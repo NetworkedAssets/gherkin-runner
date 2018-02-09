@@ -1,0 +1,56 @@
+group "org.na"
+version "1.3-SNAPSHOT"
+
+apply plugin: "java"
+apply plugin: 'kotlin'
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+ext {
+    groovyVersion = '2.4.10'
+    jacksonVersion = '2.9.1'
+    commonsVersion = '3.6'
+    apachePoiVersion = '3.17'
+    reflectionsVesrion = '0.9.11'
+    gherkinParserVersion = '4.1.3'
+    jUnitVersion = '4.12'
+    kotlinLoggingVersion = '1.4.6'
+    log4jVersion = '2.7'
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    ext {
+        kotlinVersion = "1.2.20"
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+    }
+}
+
+dependencies {
+    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
+    compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
+    compile "org.apache.commons:commons-lang3:$commonsVersion"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+    compile "org.reflections:reflections:$reflectionsVesrion"
+    compile "io.cucumber:gherkin:$gherkinParserVersion"
+    compile "junit:junit:$jUnitVersion"
+    compile "io.github.microutils:kotlin-logging:$kotlinLoggingVersion"
+    compile "org.apache.logging.log4j:log4j-core:$log4jVersion"
+    compile "org.apache.poi:poi:$apachePoiVersion"
+    compile "org.apache.poi:poi-ooxml:$apachePoiVersion"
+}

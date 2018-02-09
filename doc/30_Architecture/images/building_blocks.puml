@@ -1,0 +1,22 @@
+@startuml
+
+[GherkinRunner] as gr
+[GherkinLoader] as gl
+[Reflection] as reflection
+[FeatureRunner] as fr
+[ScenarioRunner] as sr
+[StepRunner] as str
+[CallbackRunner] as cr
+[ReportExporter] as re
+
+gr -down-> fr
+fr -down-> sr
+fr -right-> cr
+sr -right-> cr
+sr -down-> str
+
+gr -down-> reflection
+gr -down-> re
+gr -down-> gl
+
+@enduml

@@ -1,0 +1,49 @@
+@startuml
+autonumber
+participant GherkinRunner
+participant GherkinLoader
+participant FeatureRunner
+participant ScenarioRunner
+participant StepRunner
+participant CallbackRunner
+participant ReportExporter
+participant Reflection
+
+GherkinRunner -> GherkinLoader: load all features
+loop for all features
+GherkinRunner -> FeatureRunner: run feature
+FeatureRunner -> Reflection: find feature implementation
+FeatureRunner -> CallbackRunner: run before feature callback
+CallbackRunner -> Reflection: find before feature implementation
+CallbackRunner -> CallbackRunner: run found implementation
+CallbackRunner -> CallbackRunner: save report
+
+loop for all scenarios
+FeatureRunner -> ScenarioRunner: run scenario
+FeatureRunner -> Reflection: find scenario implementation
+
+ScenarioRunner -> CallbackRunner: run before scenario callback
+CallbackRunner -> Reflection: find before scenario implementation
+CallbackRunner -> CallbackRunner: run found implementation
+CallbackRunner -> CallbackRunner: save report
+
+loop for all steps
+ScenarioRunner -> StepRunner: run step
+StepRunner -> Reflection: find step implementation
+StepRunner -> StepRunner: run found implementation
+StepRunner -> StepRunner: save report
+end
+
+ScenarioRunner -> CallbackRunner: run after scenario callback
+CallbackRunner -> Reflection: find after scenario implementation
+CallbackRunner -> CallbackRunner: run found implementation
+CallbackRunner -> CallbackRunner: save report
+end
+FeatureRunner -> CallbackRunner: run after feature callback
+CallbackRunner -> Reflection: find after feature implementation
+CallbackRunner -> CallbackRunner: run found implementation
+CallbackRunner -> CallbackRunner: save report
+end
+
+GherkinRunner -> ReportExporter: generate reports
+@enduml

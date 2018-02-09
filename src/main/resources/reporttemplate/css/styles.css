@@ -1,0 +1,158 @@
+body {
+    background: url("../img/bg.png") fixed;
+}
+
+#result {
+    margin-bottom: 15px;
+}
+
+#result button {
+    cursor: default;
+    padding: 18px 30px;
+}
+
+#environment .environment-name {
+    margin: 0;
+}
+
+.toggleable::after {
+    font-family: Icons, serif;
+    content: " \f0da";
+}
+
+.active.toggleable::after {
+    content: "  \f0d7";
+}
+
+#endpoints {
+    margin-top: 10px;
+    display: none;
+}
+
+#endpoints td.url {
+    word-break: break-all;
+}
+
+.chart {
+    max-width: 250px;
+    margin: auto;
+}
+
+.chart-stats {
+    text-align: center;
+    padding: 10px;
+}
+
+.chart-stats div {
+    text-align: center;
+    margin: 5px !important;
+}
+
+#content.container {
+    padding: 50px 10px;
+    background: rgba(0, 0, 0, 0.09);
+    -webkit-box-shadow: 0px 0px 17px 0px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: 0px 0px 17px 0px rgba(0, 0, 0, 0.75);
+    box-shadow: 0px 0px 17px 0px rgba(0, 0, 0, 0.75);
+}
+
+#content.container .header {
+    margin-top: 40px;
+}
+
+#summary {
+    text-align: center;
+}
+
+.accordion {
+    border-radius: 0 !important;
+}
+
+.accordion .title {
+    color: black !important;
+    position: relative;
+    padding-left: 45px !important;
+    border: none !important;
+}
+
+.status {
+    width: 35px;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.status i {
+    top: 50%;
+    margin: 0 auto;
+    display: block;
+    transform: translateY(-50%);
+    position: absolute;
+    left: 0;
+    right: 0;
+    color: white;
+    font-size: 20px;
+}
+.skipped > .title > .status {
+    background-color: #2185d0 !important;
+}
+
+.failed > .title > .status {
+    background-color: #db2828 !important;
+}
+
+.not-implemented > .title > .status {
+    background-color: #a4a4a4 !important;
+}
+
+.multiple-implementations > .title > .status {
+    background-color: #fbbd08 !important;
+}
+
+.passed > .title > .status {
+    background-color: #21ba45 !important;
+}
+
+#legend {
+    margin: auto;
+    margin-top: 15px;
+    max-width: 600px;
+}
+
+#legend div {
+    margin: 5px !important;
+}
+
+.stepReport h5 {
+    font-weight: normal;
+    font-style: italic;
+}
+
+.accordion .title h3, .accordion .title h4, .accordion .title h5 {
+    margin: 0;
+}
+.execution-time {
+    font-weight: normal;
+}
+
+.stack-trace {
+    word-wrap: break-word;
+}
+
+.log {
+    height: 200px;
+    overflow-x: auto;
+    resize: vertical !important;
+}
+
+.log p {
+    margin: 0;
+    -webkit-transition: all .5s;
+    transition: all .5s;
+}
+
+.log p:hover {
+    margin: 0;
+    background: #ddd;
+}
