@@ -2,22 +2,24 @@
 
 ## 1. Dependency
 
-To start using Gherkin Runner add Groovy to your project and following GR dependency:
+To start using Gherkin Runner, add Groovy to your project and following GR dependency:
 
 Gradle: 
 
-`testCompile "org.na:gherkin-runner:[gr-version]"`
+`testCompile "com.networkedassets:gherkin-runner:[gr-version]"`
 
 Maven: 
 
 ```xml
 <dependency>
-    <groupId>org.na</groupId>
+    <groupId>com.networkedassets</groupId>
     <artifactId>gherkin-runner</artifactId>
     <version>[gr-version]</version>
     <scope>test</scope>
 </dependency>
 ```
+
+**Gherkin Runner is hosted on jCenter, so it is required to add it to your project's repositories**
 
 ## 2. Main test class
 
@@ -134,7 +136,7 @@ Example configuration:
 
 ```groovy
 @RunWith(GherkinRunner.class)
-@ImplementationsPackage("org.na.tests.specs")
+@ImplementationsPackage("com.networkedassets.tests.specs")
 @Extensions(MyHTMLReportExporter.class)
 @Reports("MyHTML")
 class TestsRunner {

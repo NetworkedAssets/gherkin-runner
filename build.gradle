@@ -1,5 +1,5 @@
-group "org.na"
-version "1.3-SNAPSHOT"
+group "com.networkedassets"
+version "1.3.0-SNAPSHOT"
 
 apply plugin: "java"
 apply plugin: 'kotlin'
