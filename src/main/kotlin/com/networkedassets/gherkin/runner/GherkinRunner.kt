@@ -1,9 +1,6 @@
 package com.networkedassets.gherkin.runner
 
-import mu.KotlinLogging
-import org.junit.runner.Description
-import org.junit.runner.Runner
-import org.junit.runner.notification.RunNotifier
+import com.networkedassets.gherkin.runner.report.ElasticsearchReportExporter
 import com.networkedassets.gherkin.runner.report.HPQCExporter
 import com.networkedassets.gherkin.runner.report.HTMLReportExporter
 import com.networkedassets.gherkin.runner.report.JSONReportExporter
@@ -12,7 +9,12 @@ import com.networkedassets.gherkin.runner.report.data.Report
 import com.networkedassets.gherkin.runner.runners.FeatureRunner
 import com.networkedassets.gherkin.runner.util.GherkinLoader
 import com.networkedassets.gherkin.runner.util.Reflection
+import mu.KotlinLogging
+import org.junit.runner.Description
+import org.junit.runner.Runner
+import org.junit.runner.notification.RunNotifier
 import kotlin.reflect.KClass
+
 
 class GherkinRunner(private val clazz: Class<*>) : Runner() {
     private val features = GherkinLoader.loadFeatures()
@@ -40,6 +42,12 @@ class GherkinRunner(private val clazz: Class<*>) : Runner() {
         val reports = Reflection.getReports(clazz) ?: setOf("HTML")
 
         ReportExporter.exportReport(report, extensions, reports)
+
+        val elasticsearchReporting = Reflection.getElasticsearchReporting(clazz)
+        if (elasticsearchReporting != null) {
+            log.info("Elasticsaerch reporting turned on, trying to put report into Elastisearch")
+            ElasticsearchReportExporter.reportToElasticsearch(elasticsearchReporting, report)
+        }
         log.info("Report has been exported")
     }
 

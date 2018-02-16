@@ -90,4 +90,8 @@ object Reflection {
         val reports = runnerClass.getAnnotation(Reports::class.java)
         return reports?.value?.toSet()
     }
+
+    fun getElasticsearchReporting(runnerClass: Class<*>): ElasticSearchReporting? {
+        return runnerClass.getAnnotation(ElasticSearchReporting::class.java)
+    }
 }

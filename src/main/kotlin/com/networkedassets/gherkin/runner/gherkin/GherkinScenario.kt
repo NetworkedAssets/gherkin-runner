@@ -6,6 +6,7 @@ import java.io.Serializable
 data class GherkinScenario(val name: String,
                            val description: String?,
                            @JsonIgnore val feature: GherkinFeature) : Serializable {
+    @JsonIgnore
     val steps = mutableListOf<GherkinStep>()
 
     val featureName

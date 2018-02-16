@@ -7,7 +7,7 @@ class JSONReportExporter : ReportExporter {
 
     override fun export(report: Report) {
         val jsonReportFilePath = "${reportsDir()}/report.json"
-        val json = ReportSerializer.reportToJson(report)
+        val json = JSONSerializer.toJson(report)
         writeToFile(jsonReportFilePath, json)
     }
 }

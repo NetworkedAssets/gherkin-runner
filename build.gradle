@@ -1,31 +1,3 @@
-group "com.networkedassets"
-version "1.3.0-SNAPSHOT"
-
-apply plugin: "java"
-apply plugin: 'kotlin'
-apply plugin: 'groovy'
-apply plugin: 'maven'
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-ext {
-    groovyVersion = '2.4.10'
-    jacksonVersion = '2.9.1'
-    commonsVersion = '3.6'
-    apachePoiVersion = '3.17'
-    reflectionsVesrion = '0.9.11'
-    gherkinParserVersion = '4.1.3'
-    jUnitVersion = '4.12'
-    kotlinLoggingVersion = '1.4.6'
-    log4jVersion = '2.7'
-}
-
-repositories {
-    mavenCentral()
-    jcenter()
-}
-
 buildscript {
     repositories {
         mavenCentral()
@@ -40,6 +12,45 @@ buildscript {
     }
 }
 
+apply plugin: "java"
+apply plugin: 'kotlin'
+apply plugin: 'groovy'
+apply plugin: 'maven-publish'
+
+group "com.networkedassets"
+version "1.4.0-SNAPSHOT"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+ext {
+    groovyVersion = '2.4.10'
+    jacksonVersion = '2.9.1'
+    commonsVersion = '3.6'
+    apachePoiVersion = '3.17'
+    reflectionsVesrion = '0.9.11'
+    gherkinParserVersion = '4.1.3'
+    jUnitVersion = '4.12'
+    kotlinLoggingVersion = '1.4.6'
+    log4jVersion = '2.7'
+    elasticSearchVersion = '6.2.1'
+    slf4jLog4j = '1.7.25'
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+
 dependencies {
     compile "org.codehaus.groovy:groovy-all:$groovyVersion"
     compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
@@ -51,6 +62,8 @@ dependencies {
     compile "junit:junit:$jUnitVersion"
     compile "io.github.microutils:kotlin-logging:$kotlinLoggingVersion"
     compile "org.apache.logging.log4j:log4j-core:$log4jVersion"
+    compile "org.elasticsearch.client:transport:$elasticSearchVersion"
     compile "org.apache.poi:poi:$apachePoiVersion"
     compile "org.apache.poi:poi-ooxml:$apachePoiVersion"
+    testCompile "org.slf4j:slf4j-log4j12:$slf4jLog4j"
 }

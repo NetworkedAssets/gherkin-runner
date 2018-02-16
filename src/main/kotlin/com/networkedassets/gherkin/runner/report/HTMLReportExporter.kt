@@ -10,7 +10,7 @@ class HTMLReportExporter : ReportExporter {
         val htmlReportDir = "${reportsDir()}/html"
         val htmlReportFilePath = "$htmlReportDir/data.js"
         ReportInstaller.installResources(Paths.get(htmlReportDir), this.javaClass, "reporttemplate")
-        val json = ReportSerializer.reportToJson(report)
+        val json = JSONSerializer.toJson(report)
         val jsonDataContent = "var reportData = $json"
         writeToFile(htmlReportFilePath, jsonDataContent)
     }
