@@ -1,7 +1,14 @@
 package com.networkedassets.gherkin.runner.util
 
-import groovy.lang.Closure
-import com.networkedassets.gherkin.runner.annotation.*
+import com.networkedassets.gherkin.runner.annotation.AfterFeature
+import com.networkedassets.gherkin.runner.annotation.AfterScenario
+import com.networkedassets.gherkin.runner.annotation.BeforeFeature
+import com.networkedassets.gherkin.runner.annotation.BeforeScenario
+import com.networkedassets.gherkin.runner.annotation.ElasticSearchReporting
+import com.networkedassets.gherkin.runner.annotation.Extensions
+import com.networkedassets.gherkin.runner.annotation.Feature
+import com.networkedassets.gherkin.runner.annotation.ImplementationsPackage
+import com.networkedassets.gherkin.runner.annotation.Reports
 import com.networkedassets.gherkin.runner.exception.MultipleImplementationsException
 import com.networkedassets.gherkin.runner.exception.NotFoundImplementationException
 import com.networkedassets.gherkin.runner.gherkin.GherkinFeature
@@ -11,6 +18,7 @@ import com.networkedassets.gherkin.runner.gherkin.StepKeyword
 import com.networkedassets.gherkin.runner.metadata.RunnerMetadata
 import com.networkedassets.gherkin.runner.report.data.CallbackType
 import com.networkedassets.gherkin.runner.specification.FeatureSpecification
+import groovy.lang.Closure
 import org.reflections.Reflections
 import java.lang.reflect.Method
 import kotlin.reflect.KClass
@@ -68,12 +76,13 @@ object Reflection {
     }
 
     fun getGherkinRunnerMetadata(runnerClass: Class<*>): RunnerMetadata {
-        val metadataMethod = runnerClass.getMethod("metadata")
-        if (metadataMethod != null && metadataMethod.returnType.isAssignableFrom(RunnerMetadata::class.java)) {
-            return metadataMethod.invoke(runnerClass.newInstance()) as RunnerMetadata
-        } else {
-            return RunnerMetadata()
-        }
+        try {
+            val metadataMethod = runnerClass.getMethod("metadata")
+            if (metadataMethod.returnType.isAssignableFrom(RunnerMetadata::class.java))  {
+                metadataMethod.invoke(runnerClass.newInstance()) as RunnerMetadata
+            }
+        } catch (ignore: NoSuchMethodException) {}
+        return RunnerMetadata()
     }
 
     fun getImplementationsPackage(runnerClass: Class<*>): String? {
