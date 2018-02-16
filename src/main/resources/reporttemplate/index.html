@@ -1,146 +1,236 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:v-bind="http://www.w3.org/1999/xhtml" xmlns:v-on="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Gherkin Runner Report</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:400,500,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.11.8/semantic.min.css"/>
     <link rel="stylesheet" href="css/semantic.min.css"/>
     <link rel="stylesheet" href="css/styles.css"/>
 </head>
 <body>
 <div id="app">
-    <div class="ui fixed inverted menu">
-        <div class="ui container">
-            <a href="#" class="header item">
-                {{suiteName}} Report
-            </a>
-            <a href="#summary" class="item smooth-goto">Summary</a>
-            <a href="#statistics" class="item smooth-goto">Statistics</a>
-            <a href="#features" class="item smooth-goto">Features</a>
+    <div id="preloader">
+        <div class="preloader-banner">
+            <h2>Gherkin Runner</h2>
+            <div class="loading-info">Loading report...</div>
+            <div class="ui active centered inverted inline loader"></div>
         </div>
     </div>
-    <div id="content" class="ui container">
-        <div id="summary">
-            <h2 class="ui horizontal divider header">
-                <i class="info circle icon"></i>
-                {{suiteName}}
-            </h2>
-            <div id="result">
-                <div class="ui buttons">
-                    <button class="ui massive button" v-bind:class="{green: passed, grey: !passed, basic: !passed}">
-                        PASSED
-                    </button>
-                    <button class="ui massive button" v-bind:class="{red: !passed, grey: passed, basic: passed}">FAILED
-                    </button>
+    <div id="header">
+        <div id="top-header">
+            <div id="logo">
+                <!--<img src="img/logo.png" height="30">-->
+                <div class="title">Gherkin Runner</div>
+            </div>
+            <div id="menu">
+                <a class="smooth-goto" href="#summary">Summary</a>
+                <a class="smooth-goto" href="#statistics">Statistics</a>
+                <div class="ui inline dropdown">
+                    <div class="text">
+                        Features
+                    </div>
+                    <i class="dropdown icon"></i>
+                    <div class="menu">
+                        <a v-for="(featureReport, index) in report.featureReports" v-bind:href="'#feature-' + ((flat) ? 'flat' : 'notflat') + index" class="smooth-goto item">
+                            {{ featureReport.feature.name }}
+                        </a>
+                    </div>
+                </div>
+                <a class="smooth-goto" href="#logs">Logs</a>
+            </div>
+        </div>
+        <div id="bottom-header">
+            {{suiteName}}
+            <button v-if="environment" class="ui tiny green button toggleable environment-button">Environment</button>
+        </div>
+        <div id="endpoints" v-if="environment">
+            <div class="ui container">
+                <div class="environment-name">
+                    <span class="env-label">Environment: </span>
+                    <span class="env-name">{{environment.name}}</span>
+                </div>
+
+                <table class="ui celled padded table">
+                    <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>URL</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="endpoint in environment.endpoints">
+                        <td><strong>{{endpoint.name}}</strong></td>
+                        <td v-if="endpoint.endpointType == 'MOCK'" class="url">---</td>
+                        <td v-if="endpoint.endpointType != 'MOCK'" class="url">{{endpoint.url}}</td>
+                        <td class="positive" v-if="endpoint.status == 'UP'">AVAILABLE</td>
+                        <td class="negative" v-if="endpoint.status == 'DOWN'">UNAVAILABLE</td>
+                        <td class="warning" v-if="endpoint.endpointType == 'MOCK'">MOCK</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="content">
+        <div id="summary" class="report-section">
+            <div class="ui container">
+                <div id="result">
+                    <div class="test-result passed" v-if="passed">PASSED</div>
+                    <div class="test-result failed" v-if="!passed">FAILED</div>
+                </div>
+                <div class="ui steps times-steps">
+                    <div class="step">
+                        <img src="img/start_icon.png"/>
+                        <div class="content">
+                            <div class="title">Start time</div>
+                            <div class="description">
+                                <div>{{startDate}}</div>
+                                <div>{{startTime}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <img src="img/end_icon.png"/>
+                        <div class="content">
+                            <div class="title">End time</div>
+                            <div class="description">
+                                <div>{{endDate}}</div>
+                                <div>{{endTime}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <img src="img/duration_icon.png"/>
+                        <div class="content">
+                            <div class="title">Execution time</div>
+                            <div class="description">{{executionTime}}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="ui steps times-steps">
-                <div class="step">
-                    <i class="hourglass start icon"></i>
-                    <div class="content">
-                        <div class="title">Start time</div>
-                        <div class="description">{{startTime}}</div>
-                    </div>
-                </div>
-                <div class="step">
-                    <i class="hourglass half icon"></i>
-                    <div class="content">
-                        <div class="title">Execution time</div>
-                        <div class="description">{{executionTime}}</div>
-                    </div>
-                </div>
-                <div class="step">
-                    <i class="hourglass end icon"></i>
-                    <div class="content">
-                        <div class="title">End time</div>
-                        <div class="description">{{endTime}}</div>
+        </div>
+        <div id="statistics" class="report-section even">
+            <div class="ui container">
+                <h2 class="report-section-header">Statistics</h2>
+                <div class="ui stackable grid">
+                    <div class="three column row">
+                        <div class="column">
+                            <chart title="Features" icon="cubes"
+                                   :statistics="parseFeaturesStateStatistics(report)"></chart>
+                        </div>
+                        <div class="column">
+                            <chart title="Scenarios" icon="file text outline"
+                                   :statistics="parseScenariosStateStatistics(report)"></chart>
+                        </div>
+                        <div class="column">
+                            <chart title="Steps" icon="paw" :statistics="parseStepsStateStatistics(report)"></chart>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div id="environment" v-if="environment">
-                <h4 class="ui header">
-                    <i class="server icon"></i>
-                    Environment
-                </h4>
-                <button class="ui black massive button toggleable">{{environment.name}}</button>
-                <div  id="endpoints">
-                    <table class="ui celled padded table">
+        </div>
+        <div id="features" class="report-section">
+            <div class="ui container">
+                <div class="back-to-features-summary">
+                    <a href="#features-overview" class="ui icon button smooth-goto">
+                        <i class="arrow circle up icon"></i>
+                    </a>
+                </div>
+                <h2 class="report-section-header" id="features-overview">Features overview</h2>
+                <table class="ui celled table report-table">
+                    <thead>
+                    <tr>
+                        <th>Feature name</th>
+                        <th>Time</th>
+                        <th>State</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(featureReport, index) in report.featureReports">
+                            <td><a class="smooth-goto" v-bind:href="'#feature-' + ((flat) ? 'flat' : 'notflat') + index">{{ featureReport.feature.name }}</a></td>
+                            <td class="nowrap">{{ humanizeExecutionTime(featureReport.executionTime) }}</td>
+                            <td>
+                                <featurestate v-bind:state="featureReport.state"></featurestate>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2 class="report-section-header">Features specification</h2>
+                <div class="ui toggle checkbox">
+                    <input type="checkbox" v-model="flat" name="flat">
+                    <label>Flat view</label>
+                </div>
+                <div v-show="flat" v-bind:id="'feature-flat' + index" v-for="(featureReport, index) in report.featureReports" class="feature-section">
+                    <table class="ui celled table report-table">
                         <thead>
                         <tr>
-                            <th>Service</th>
-                            <th>URL</th>
-                            <th>Status</th>
+                            <th colspan="2">Type</th>
+                            <th>Time</th>
+                            <th>Content</th>
+                            <th></th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr v-for="endpoint in environment.endpoints">
-                            <td><strong>{{endpoint.name}}</strong></td>
-                            <td v-if="endpoint.endpointType == 'MOCK'" class="url">---</td>
-                            <td v-if="endpoint.endpointType != 'MOCK'" class="url">{{endpoint.url}}</td>
-                            <td class="positive" v-if="endpoint.status == 'UP'">AVAILABLE</td>
-                            <td class="negative" v-if="endpoint.status == 'DOWN'">UNAVAILABLE</td>
-                            <td class="warning" v-if="endpoint.endpointType == 'MOCK'">MOCK</td>
+                        <tr v-bind:class="getStyleClasses(featureReport)">
+                            <td class="status"><i class="cube icon"></i></td>
+                            <td class="nowrap">feature</td>
+                            <td class="nowrap">{{ humanizeExecutionTime(featureReport.executionTime) }}</td>
+                            <td>{{ featureReport.feature.name }}</td>
+                            <td><a v-on:click="showLogs(featureReport, $event)">logs</a></td>
                         </tr>
+                        <tr is="callbackrow" @showlogs="showLogs(featureReport.beforeReport)"
+                            v-bind:report="featureReport.beforeReport" title="before feature"></tr>
+                        </tbody>
+                        <tbody v-for="scenarioReport in featureReport.scenarioReports">
+                        <tr v-bind:class="getStyleClasses(scenarioReport)">
+                            <td class="status"><i class="file text outline icon"></i></td>
+                            <td class="nowrap">scenario</td>
+                            <td class="nowrap">{{ humanizeExecutionTime(scenarioReport.executionTime) }}</td>
+                            <td>{{ scenarioReport.scenario.name }}</td>
+                            <td><a v-on:click="showLogs(scenarioReport, $event)">logs</a></td>
+                        </tr>
+                        <tr is="callbackrow" @showlogs="showLogs(scenarioReport.beforeReport)"
+                            v-bind:report="scenarioReport.beforeReport"
+                            title="before scenario"></tr>
+                        <tr is="steprow" v-for="stepReport in scenarioReport.stepReports"
+                            @showlogs="showLogs(stepReport)"
+                            @showerror="showError(stepReport)" v-bind:stepreport="stepReport"></tr>
+                        <tr is="callbackrow" @showlogs="showLogs(scenarioReport.afterReport)"
+                            v-bind:report="scenarioReport.afterReport"
+                            title="after scenario"></tr>
+                        </tbody>
+                        <tbody>
+                        <tr is="callbackrow" @showlogs="showLogs(featureReport.afterReport)"
+                            v-bind:report="featureReport.afterReport" title="after feature"></tr>
                         </tbody>
                     </table>
+                    <div v-if="index != report.featureReports.length - 1" class="features-divider"></div>
                 </div>
-            </div>
-            <div id="legend">
-                <h4 class="ui header">
-                    <i class="map signs icon"></i>
-                    Legend
-                </h4>
-                <div class="ui small green label">Passed</div>
-                <div class="ui small red label">Failed</div>
-                <div class="ui small blue label">Skipped</div>
-                <div class="ui small grey label">Not implemented</div>
-                <div class="ui small yellow label">Multiple implementations</div>
-            </div>
-        </div>
-        <div id="statistics">
-            <h2 class="ui horizontal divider header">
-                <i class="pie chart icon"></i>
-                Statistics
-            </h2>
-            <div class="ui stackable grid">
-                <div class="three column row">
-                    <div class="column">
-                        <chart title="Features" icon="cubes" :statistics="parseFeaturesStateStatistics(report)"></chart>
-                    </div>
-                    <div class="column">
-                        <chart title="Scenarios" icon="file text outline"
-                               :statistics="parseScenariosStateStatistics(report)"></chart>
-                    </div>
-                    <div class="column">
-                        <chart title="Steps" icon="paw" :statistics="parseStepsStateStatistics(report)"></chart>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="features">
-            <h2 class="ui horizontal divider header">
-                <i class="cubes icon"></i>
-                Features
-            </h2>
-            <div class="ui fluid styled accordion features-accordion">
-                <div v-for="featureReport in report.featureReports" v-bind:class="getStyleClasses(featureReport)">
-                    <div class="title">
-                        <div class="status">
-                            <i class="cube icon"></i>
+
+                <div v-show="!flat" v-for="(featureReport, index) in report.featureReports">
+                    <div  class="ui fluid styled accordion feature-accordion" v-bind:class="getStyleClasses(featureReport)">
+                        <div class="title" v-bind:id="'feature-notflat' + index">
+                            <div class="status">
+                                <i class="cube icon"></i>
+                            </div>
+                            <h3>
+                                Feature: {{ featureReport.feature.name }}
+                            </h3>
+                            <div class="execution-time">
+                                <i class="wait icon"></i>
+                                {{ humanizeExecutionTime(featureReport.executionTime) }}
+                            </div>
+                            <button onclick="event.stopPropagation();" class="ui basic button icon logs-button"
+                                    v-on:click="showLogs(featureReport)"><i class="browser icon"></i></button>
                         </div>
-                        <h3>
-                            Feature: {{ featureReport.feature.name }}
-                        </h3>
-                        <div class="execution-time">
-                            <i class="wait icon"></i>
-                            {{ humanizeExecutionTime(featureReport.executionTime) }}
-                        </div>
-                    </div>
-                    <div class="content">
-                        <log v-bind:logs="featureReport.log"></log>
-                        <callback v-bind:report="featureReport.beforeReport" title="Before feature"></callback>
-                        <div class="ui fluid styled accordion">
-                            <div v-for="scenarioReport in featureReport.scenarioReports"
+                        <div class="content">
+                            <callback @showlogs="showLogs(featureReport.beforeReport)"
+                                      v-bind:report="featureReport.beforeReport" title="Before feature"></callback>
+                            <div class="ui fluid styled accordion scenario-accordion"
+                                 v-for="scenarioReport in featureReport.scenarioReports"
                                  v-bind:class="getStyleClasses(scenarioReport)">
                                 <div class="title">
                                     <div class="status">
@@ -153,10 +243,12 @@
                                         <i class="wait icon"></i>
                                         {{ humanizeExecutionTime(scenarioReport.executionTime) }}
                                     </div>
+                                    <button onclick="event.stopPropagation();" class="ui basic button icon logs-button"
+                                            v-on:click="showLogs(scenarioReport)"><i class="browser icon"></i></button>
                                 </div>
                                 <div class="content">
-                                    <log v-bind:logs="scenarioReport.log"></log>
                                     <callback v-bind:report="scenarioReport.beforeReport"
+                                              @showlogs="showLogs(scenarioReport.beforeReport)"
                                               title="Before scenario"></callback>
                                     <div class="ui fluid styled accordion">
                                         <div class="stepReport"
@@ -173,29 +265,93 @@
                                                     <i class="wait icon"></i>
                                                     {{ humanizeExecutionTime(stepReport.executionTime) }}
                                                 </div>
+                                                <button onclick="event.stopPropagation();"
+                                                        class="ui basic button icon logs-button"
+                                                        v-on:click="showLogs(stepReport)"><i class="browser icon"></i>
+                                                </button>
                                             </div>
                                             <div class="content">
                                                 <error v-bind:report="stepReport"></error>
-                                                <log v-bind:logs="stepReport.log"></log>
                                             </div>
                                         </div>
                                     </div>
                                     <callback v-bind:report="scenarioReport.afterReport"
+                                              @showlogs="showLogs(scenarioReport.afterReport)"
                                               title="After scenario"></callback>
                                 </div>
                             </div>
+                            <callback v-bind:report="featureReport.afterReport"
+                                      @showlogs="showLogs(scenarioReport.afterReport)" title="After feature"></callback>
                         </div>
-                        <callback v-bind:report="featureReport.afterReport" title="After feature"></callback>
+                    </div>
+                    <div v-if="index != report.featureReports.length - 1" class="features-divider"></div>
+                </div>
+
+            </div>
+        </div>
+        <div id="logs" class="report-section even">
+            <div class="ui container">
+                <h2 class="report-section-header">Logs</h2>
+                <div class="ui fluid styled accordion">
+                    <div class="title">
+                        <i class="dropdown icon"></i>
+                        Logs
+                    </div>
+                    <div class="content log">
+                        <p v-for="log in report.log" v-bind:style="{ 'padding-left': (log.indent * 30) + 'px' }">
+                            {{log.message}}
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
-        <div id="logs">
-            <h2 class="ui horizontal divider header">
-                <i class="file text outline icon"></i>
-                Logs
-            </h2>
-            <log v-bind:logs="report.log"></log>
+    </div>
+
+    <div id="logs-modal" class="ui large modal report-modal">
+        <div class="ui icon header" v-if="currentReport">
+            <i class="browser icon"></i>
+            <ul>
+                <li v-for="element in currentReport.fullTree">{{element}}</li>
+            </ul>
+        </div>
+        <div class="content" v-if="currentReport">
+            <div class="log">
+                <p v-for="log in currentReport.log" v-bind:style="{ 'padding-left': (log.indent * 30) + 'px' }">
+                    {{log.message}}
+                </p>
+            </div>
+        </div>
+        <div class="actions">
+            <div class="ui red cancel inverted button">
+                <i class="remove icon"></i>
+                Close
+            </div>
+        </div>
+    </div>
+
+    <div id="error-modal" class="ui large modal report-modal">
+        <div class="ui icon header" v-if="currentReport">
+            <i class="bug icon"></i>
+            <ul>
+                <li v-for="element in currentReport.fullTree">{{element}}</li>
+            </ul>
+        </div>
+        <div class="content" v-if="currentReport">
+            <div class="ui red message" v-if="currentReport.state == 'FAILED'">
+                <strong>Error message:</strong>
+                <div class="error-message">
+                    {{currentReport.error}}
+                </div>
+                <br/>
+                <strong>Stack trace:</strong>
+                <div>{{currentReport.errorStackTrace}}</div>
+            </div>
+        </div>
+        <div class="actions">
+            <div class="ui red cancel inverted button">
+                <i class="remove icon"></i>
+                Close
+            </div>
         </div>
     </div>
 </div>
@@ -215,13 +371,29 @@
                     <i class="wait icon"></i>
                     {{ humanizeExecutionTime(report.executionTime) }}
                 </div>
+                <button onclick="event.stopPropagation();" class="ui basic button icon logs-button"
+                        v-on:click="showLogs"><i class="browser icon"></i></button>
             </div>
             <div class="content">
                 <error v-bind:report="report"></error>
-                <log v-bind:logs="report.log"></log>
             </div>
         </div>
     </div>
+</script>
+
+<script type="text/x-template" id="callback-row-template">
+    <tr v-if="report.state != 'NOT_IMPLEMENTED'" v-bind:class="getStyleClasses(report)">
+        <td class="status"><i class="anchor icon"></i></td>
+        <td class="nowrap">{{ title }}</td>
+        <td class="nowrap">{{ humanizeExecutionTime(report.executionTime) }}</td>
+        <td>
+            <div class="error-message" v-if="report.state == 'FAILED'">
+                {{report.error}}
+                <a v-on:click="showError">stacktrace</a>
+            </div>
+        </td>
+        <td><a v-on:click="showLogs">logs</a></td>
+    </tr>
 </script>
 
 <script type="text/x-template" id="error-template">
@@ -242,34 +414,43 @@
     </div>
 </script>
 
-<script type="text/x-template" id="log-template">
-    <div class="ui fluid styled accordion">
-        <div class="title">
-            <i class="dropdown icon"></i>
-            Logs
-        </div>
-        <div class="content log">
-            <p v-for="log in logs" v-bind:style="{ 'padding-left': (log.indent * 30) + 'px' }">
-                {{log.message}}
-            </p>
-        </div>
-    </div>
-</script>
-
 <script type="text/x-template" id="chart-template">
     <div>
-        <h4 class="ui center aligned header">
-            <i v-bind:class="icon" class="icon"></i>
-            {{title}}
-        </h4>
-        <canvas class="chart" width="400" height="400"></canvas>
+        <div class="chart-content">
+            <div class="chart-name">{{title}}</div>
+            <div>
+                <canvas class="chart" width="400" height="400"></canvas>
+            </div>
+        </div>
         <div class="chart-stats">
             <div class="ui small green label">{{statistics.passed}} passed</div>
             <div class="ui small red label">{{statistics.failed}} failed</div>
             <div class="ui small blue label">{{statistics.skipped}} skipped</div>
             <div class="ui small grey label">{{statistics.notImplemented}} not implemented</div>
-            <div class="ui small yellow label">{{statistics.multipleImplementatmions}} multiple imeplemntations</div>
+            <div class="ui small yellow label">{{statistics.multipleImplementatmions}} multiple implementations</div>
         </div>
+    </div>
+</script>
+
+<script type="text/x-template" id="step-row-template">
+    <tr v-bind:class="getStyleClasses(stepreport)">
+        <td class="status"><i class="paw icon"></i></td>
+        <td class="nowrap">step</td>
+        <td class="nowrap">{{ humanizeExecutionTime(stepreport.executionTime) }}</td>
+        <td>
+            {{ stepreport.step.fullContent }}
+            <div class="error-message" v-if="stepreport.state == 'FAILED'">
+                {{stepreport.error}}
+                <a v-on:click="showError">stacktrace</a>
+            </div>
+        </td>
+        <td><a v-on:click="showLogs">logs</a></td>
+    </tr>
+</script>
+
+<script type="text/x-template" id="feature-state-template">
+    <div class="ui large label feature-state" v-bind:class="color">
+        {{text}}
     </div>
 </script>
 
