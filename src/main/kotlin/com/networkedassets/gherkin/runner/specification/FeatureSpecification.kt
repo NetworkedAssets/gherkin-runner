@@ -1,9 +1,13 @@
 package com.networkedassets.gherkin.runner.specification
 
+import com.networkedassets.gherkin.runner.GherkinRunner
 import groovy.lang.Closure
 import com.networkedassets.gherkin.runner.gherkin.StepKeyword
 import com.networkedassets.gherkin.runner.gherkin.StepKeyword.*
+import org.junit.runner.RunWith
 
+
+@RunWith(GherkinRunner::class)
 open class FeatureSpecification {
     val stepDefs = mutableMapOf<Pair<StepKeyword, String>, Closure<Any>>()
 

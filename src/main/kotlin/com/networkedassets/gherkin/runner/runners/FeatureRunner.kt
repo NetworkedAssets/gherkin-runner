@@ -1,5 +1,6 @@
 package com.networkedassets.gherkin.runner.runners
 
+import com.networkedassets.gherkin.runner.GherkinRunner
 import mu.KotlinLogging
 import org.junit.runner.Description
 import org.junit.runner.notification.RunNotifier
@@ -11,6 +12,7 @@ import com.networkedassets.gherkin.runner.report.data.CallbackType
 import com.networkedassets.gherkin.runner.report.data.Report
 import com.networkedassets.gherkin.runner.specification.FeatureSpecification
 import com.networkedassets.gherkin.runner.util.Reflection
+import org.junit.runner.RunWith
 
 class FeatureRunner(private val implementationsPackage: String,
                     private val feature: GherkinFeature,

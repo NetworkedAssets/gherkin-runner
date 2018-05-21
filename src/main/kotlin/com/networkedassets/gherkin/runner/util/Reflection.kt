@@ -100,6 +100,11 @@ object Reflection {
         return reports?.value?.toSet()
     }
 
+    fun getFeatureAnnotationValue(runnerClass: Class<*>): String? {
+        val reports = runnerClass.getAnnotation(Feature::class.java)
+        return reports?.value
+    }
+
     fun getElasticsearchReporting(runnerClass: Class<*>): ElasticSearchReporting? {
         return runnerClass.getAnnotation(ElasticSearchReporting::class.java)
     }

@@ -16,10 +16,18 @@ import java.util.regex.Pattern
 object GherkinLoader {
     @JvmStatic
     @JvmOverloads
-    fun loadFeatures(packagePrefix: String = ""): List<GherkinFeature> {
+    fun loadFeatures(packagePrefix: String = "", featureFilter: String? = null, scenarioFilter: String? = null): List<GherkinFeature> {
         val reflections = Reflections(packagePrefix, ResourcesScanner())
         val fileNames = reflections.getResources(Pattern.compile(".*\\.feature"))
-        return fileNames.map({ readFeatureFromFile(it) })
+        return fileNames.map({ readFeatureFromFile(it) }).filter(featureFilter, scenarioFilter)
+    }
+
+    private fun List<GherkinFeature>.filter(featureFilter: String? = null, scenarioFilter: String? = null): List<GherkinFeature> {
+        return this.filter { featureFilter == null || it.name == featureFilter }.map {
+            val gherkinFeature = GherkinFeature(it.name)
+            gherkinFeature.scenarios.addAll(it.scenarios.filter { scenario -> scenarioFilter == null || scenario.name == scenarioFilter })
+            gherkinFeature
+        }
     }
 
     private fun readFeatureFromFile(path: String): GherkinFeature {

@@ -1,5 +1,6 @@
 package com.networkedassets.gherkin.runner
 
+import com.networkedassets.gherkin.runner.gherkin.GherkinFeature
 import com.networkedassets.gherkin.runner.report.ElasticsearchReportExporter
 import com.networkedassets.gherkin.runner.report.HPQCExporter
 import com.networkedassets.gherkin.runner.report.HTMLReportExporter
@@ -12,13 +13,18 @@ import com.networkedassets.gherkin.runner.util.Reflection
 import mu.KotlinLogging
 import org.junit.runner.Description
 import org.junit.runner.Runner
+import org.junit.runner.manipulation.Filter
+import org.junit.runner.manipulation.Filterable
 import org.junit.runner.notification.RunNotifier
 import kotlin.reflect.KClass
 
 
-class GherkinRunner(private val clazz: Class<*>) : Runner() {
-    private val features = GherkinLoader.loadFeatures()
-    private val description = createDescription()
+class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
+    private val featureFilter = Reflection.getFeatureAnnotationValue(clazz)
+    private var scenarioFilter: String? = null
+    private lateinit var features: List<GherkinFeature>
+    private lateinit var description: Description
+
 
     val log = KotlinLogging.logger { }
 
@@ -53,10 +59,16 @@ class GherkinRunner(private val clazz: Class<*>) : Runner() {
 
     private fun featuresJoinedWithDescriptions() = features.zip(description.children)
 
-    override fun getDescription() = description
+    override fun filter(filter: Filter) {
+        val filterDescription = filter.describe()
+        if(filterDescription.startsWith("Method ")) {
+            scenarioFilter = filterDescription.removePrefix("Method ").split("(")[0]
+        }
+    }
 
-    private fun createDescription(): Description {
-        val description = Description.createSuiteDescription("GherkinRunner")
+    override fun getDescription(): Description {
+        features = GherkinLoader.loadFeatures(featureFilter = featureFilter, scenarioFilter = scenarioFilter)
+        description = Description.createSuiteDescription("GherkinRunner")
         features.forEach { feature ->
             val featureSuiteDescription = Description.createSuiteDescription(feature.name)
             val beforeFeature = Description.createTestDescription(feature.name, "> Before feature")
