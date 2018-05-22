@@ -30,6 +30,8 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
 
     override fun run(notifier: RunNotifier) {
         log.info { "Starting GherkinRunner test suite" }
+        initializeFeatures()
+        initializeDescription()
         val gherkinRunnerMetadata = Reflection.getGherkinRunnerMetadata(clazz)
         val report = Report(gherkinRunnerMetadata.suiteName, gherkinRunnerMetadata.environment)
         report.start()
@@ -67,8 +69,8 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
     }
 
     override fun getDescription(): Description {
-        features = GherkinLoader.loadFeatures(featureFilter = featureFilter, scenarioFilter = scenarioFilter)
-        description = Description.createSuiteDescription("GherkinRunner")
+        initializeFeatures()
+        initializeDescription()
         features.forEach { feature ->
             val featureSuiteDescription = Description.createSuiteDescription(feature.name)
             val beforeFeature = Description.createTestDescription(feature.name, "> Before feature")
@@ -90,5 +92,13 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
             description.addChild(featureSuiteDescription)
         }
         return description
+    }
+
+    private fun initializeDescription() {
+        if(!::description.isInitialized) description = Description.createSuiteDescription("GherkinRunner")
+    }
+
+    private fun initializeFeatures() {
+        if(!::features.isInitialized) features = GherkinLoader.loadFeatures(featureFilter = featureFilter, scenarioFilter = scenarioFilter)
     }
 }
