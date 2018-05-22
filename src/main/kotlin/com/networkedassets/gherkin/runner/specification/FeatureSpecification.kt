@@ -33,6 +33,7 @@ open class FeatureSpecification {
             GIVEN -> given(stepText, closure)
             WHEN -> `when`(stepText, closure)
             THEN -> then(stepText, closure)
+            AND -> throw IllegalStateException("Should never happen. AND token is illegal to be lastType")
         }
     }
 
