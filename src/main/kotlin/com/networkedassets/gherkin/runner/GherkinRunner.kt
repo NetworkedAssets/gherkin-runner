@@ -71,31 +71,33 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
     override fun getDescription(): Description {
         initializeFeatures()
         initializeDescription()
-        features.forEach { feature ->
-            val featureSuiteDescription = Description.createSuiteDescription(feature.name)
-            val beforeFeature = Description.createTestDescription(feature.name, "> Before feature")
-            featureSuiteDescription.addChild(beforeFeature)
-            feature.scenarios.forEach { scenario ->
-                val scenarioSuiteDescription = Description.createSuiteDescription(scenario.name)
-                val beforeScenario = Description.createTestDescription(scenario.name, "> Before scenario")
-                scenarioSuiteDescription.addChild(beforeScenario)
-                scenario.steps.forEach { step ->
-                    val stepDescription = Description.createTestDescription(scenario.name, step.fullContent)
-                    scenarioSuiteDescription.addChild(stepDescription)
-                }
-                val afterScenario = Description.createTestDescription(scenario.name, "> After scenario")
-                scenarioSuiteDescription.addChild(afterScenario)
-                featureSuiteDescription.addChild(scenarioSuiteDescription)
-            }
-            val afterFeature = Description.createTestDescription(feature.name, "> After feature")
-            featureSuiteDescription.addChild(afterFeature)
-            description.addChild(featureSuiteDescription)
-        }
         return description
     }
 
     private fun initializeDescription() {
-        if(!::description.isInitialized) description = Description.createSuiteDescription("GherkinRunner")
+        if(!::description.isInitialized) {
+            description = Description.createSuiteDescription("GherkinRunner")
+            features.forEach { feature ->
+                val featureSuiteDescription = Description.createSuiteDescription(feature.name)
+                val beforeFeature = Description.createTestDescription(feature.name, "> Before feature")
+                featureSuiteDescription.addChild(beforeFeature)
+                feature.scenarios.forEach { scenario ->
+                    val scenarioSuiteDescription = Description.createSuiteDescription(scenario.name)
+                    val beforeScenario = Description.createTestDescription(scenario.name, "> Before scenario")
+                    scenarioSuiteDescription.addChild(beforeScenario)
+                    scenario.steps.forEach { step ->
+                        val stepDescription = Description.createTestDescription(scenario.name, step.fullContent)
+                        scenarioSuiteDescription.addChild(stepDescription)
+                    }
+                    val afterScenario = Description.createTestDescription(scenario.name, "> After scenario")
+                    scenarioSuiteDescription.addChild(afterScenario)
+                    featureSuiteDescription.addChild(scenarioSuiteDescription)
+                }
+                val afterFeature = Description.createTestDescription(feature.name, "> After feature")
+                featureSuiteDescription.addChild(afterFeature)
+                description.addChild(featureSuiteDescription)
+            }
+        }
     }
 
     private fun initializeFeatures() {
