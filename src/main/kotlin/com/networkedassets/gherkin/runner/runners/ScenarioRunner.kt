@@ -9,6 +9,7 @@ import com.networkedassets.gherkin.runner.exception.NotFoundImplementationExcept
 import com.networkedassets.gherkin.runner.gherkin.GherkinScenario
 import com.networkedassets.gherkin.runner.report.data.CallbackType
 import com.networkedassets.gherkin.runner.report.data.FeatureReport
+import com.networkedassets.gherkin.runner.specification.ExampleBindings
 import com.networkedassets.gherkin.runner.specification.FeatureSpecification
 import com.networkedassets.gherkin.runner.util.Reflection
 import java.lang.reflect.Method
@@ -27,6 +28,7 @@ class ScenarioRunner(private val scenario: GherkinScenario,
         scenarioReport.start()
         try {
             val scenarioMethod = Reflection.getMethodForScenario(featureSpecification, scenario)
+            featureSpecification.bindings = ExampleBindings(scenario.bindings)
             runImplemented(featureSpecification, scenarioMethod)
         } catch (e: NotFoundImplementationException) {
             runNotImplemented()

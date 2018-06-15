@@ -41,7 +41,8 @@ object Reflection {
     }
 
     fun getMethodForScenario(featureSpecification: FeatureSpecification, scenario: GherkinScenario): Method {
-        val scenarioMethods = featureSpecification.javaClass.methods.filter({ it.name == scenario.name })
+        val scenarioName = scenario.outline?.name ?: scenario.name
+        val scenarioMethods = featureSpecification.javaClass.methods.filter({ it.name == scenarioName })
 
         if (scenarioMethods.size > 1) {
             throw MultipleImplementationsException("Multiple scenario implementations for ${scenario.fullTree}")
@@ -52,7 +53,8 @@ object Reflection {
     }
 
     fun getClosureForStep(stepDefs: Map<Pair<StepKeyword, String>, Closure<Any>>, step: GherkinStep): Closure<Any> {
-        return stepDefs[Pair(step.realKeyword, step.content)] ?: throw NotFoundImplementationException("Step implementation not found for ${step.fullTree}")
+        val stepContent = step.outlinedContent ?: step.content
+        return stepDefs[Pair(step.realKeyword, stepContent)] ?: throw NotFoundImplementationException("Step implementation not found for ${step.fullTree}")
     }
 
     fun getCallbackMethod(featureSpecification: FeatureSpecification, callbackType: CallbackType): Method {

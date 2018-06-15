@@ -164,3 +164,56 @@ when("The element added to the list") { data ->
     list.add(data[1][0])
 }
 ```
+
+## 6. Scenario outline
+
+Gherkin Runner is able to run scenario outlines expressed in features file in following way:
+
+```gherkin
+Feature: New businesses
+
+  Scenario Outline: Businesses should provide required data
+
+    Given a restaurant <business> on <location>
+    When <business> signs up to Mapper
+    Then it <should?> be added to the platform
+    And its name <should?> appear on the map at <location>
+
+    Examples: Business name and location should be required
+      | business         | location | should?   |
+      | UNNAMED BUSINESS | NOWHERE  | shouldn't |
+
+    Examples: Allow only businesses with correct names
+      | business         | location                  | should?   |
+      | Back to Black    | 8114 2nd Street, Stockton | should    |
+      | UNNAMED BUSINESS | 8114 2nd Street, Stockton | shouldn't |
+```
+
+To implement it you have to use scenario and names of steps from outline, like this:
+```
+@Feature("New businesses")
+class NewBusinessSpec extends FeatureSpecification {
+    def "Businesses should provide required data"() {
+        given("a restaurant <business> on <location>") {
+            // getting some value from binding defined in feature file
+            bindings.getString("business")
+        }
+
+        when("<business> signs up to Mapper") {
+        }
+
+        then("it <should?> be added to the platform") {
+        }
+
+        and("its name <should?> appear on the map at <location>") {
+        }
+    }
+}
+```
+
+Gherkin runner will run the implementation as many times, as many is records in examples tables. Placeholders in scenario name and steps will be 
+replaced with bindings values from table for current run. To get bounded values in test implementation `bindings` object should be used. It offers 
+four methods for getting values represented as specified type: getString(), getBoolean(), getInt(), getDouble(). When there is no bindings with key
+passed to one of these methods exception will be thrown. The exception will be also thrown, when it will be not possible to convert some value to
+specified type. It is worth of notice, that getBoolean() will return false for values: "false", "n", "no" and ones, which end with "not" or "n't".
+The rest of values will be converted to true.

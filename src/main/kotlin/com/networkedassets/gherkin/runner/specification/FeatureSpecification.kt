@@ -10,6 +10,7 @@ import org.junit.runner.RunWith
 @RunWith(GherkinRunner::class)
 open class FeatureSpecification {
     val stepDefs = mutableMapOf<Pair<StepKeyword, String>, Closure<Any>>()
+    lateinit var bindings: ExampleBindings
 
     private var lastType: StepKeyword = GIVEN
 

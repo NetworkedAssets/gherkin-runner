@@ -1,13 +1,22 @@
 package com.networkedassets.gherkin.runner.util
 
-import gherkin.AstBuilder
-import gherkin.Parser
-import gherkin.ast.*
+import com.networkedassets.gherkin.runner.gherkin.GherkinExamples
 import com.networkedassets.gherkin.runner.gherkin.GherkinFeature
 import com.networkedassets.gherkin.runner.gherkin.GherkinScenario
 import com.networkedassets.gherkin.runner.gherkin.GherkinStep
 import com.networkedassets.gherkin.runner.gherkin.StepKeyword
-import com.networkedassets.gherkin.runner.gherkin.StepKeyword.*
+import com.networkedassets.gherkin.runner.gherkin.StepKeyword.AND
+import com.networkedassets.gherkin.runner.gherkin.StepKeyword.GIVEN
+import com.networkedassets.gherkin.runner.gherkin.StepKeyword.valueOf
+import com.networkedassets.gherkin.runner.util.GherkinLoader.to2DArray
+import gherkin.AstBuilder
+import gherkin.Parser
+import gherkin.ast.DataTable
+import gherkin.ast.Feature
+import gherkin.ast.GherkinDocument
+import gherkin.ast.ScenarioDefinition
+import gherkin.ast.ScenarioOutline
+import gherkin.ast.Step
 import org.reflections.Reflections
 import org.reflections.scanners.ResourcesScanner
 import java.util.regex.Pattern
@@ -41,10 +50,12 @@ object GherkinLoader {
     private fun convertFeature(feature: Feature): GherkinFeature {
         val gherkinFeature = GherkinFeature(feature.name)
         feature.children
-            .map({ convertScenario(gherkinFeature, it) })
-            .forEach({ gherkinFeature.addScenario(it) })
+                .flatMap {
+                    val scenario = convertScenario(gherkinFeature, it)
+                    if (scenario.isOutline) converOutlineToManyScenarios(scenario)
+                    else listOf(scenario)
+                }.forEach({ gherkinFeature.addScenario(it) })
         return gherkinFeature
-
     }
 
     private fun convertScenario(feature: GherkinFeature, scenario: ScenarioDefinition): GherkinScenario {
@@ -58,10 +69,37 @@ object GherkinLoader {
             val gherkinStep = convertStep(gherkinScenario, stepKeyword, realKeyword, it)
             gherkinScenario.addStep(gherkinStep)
         }
+        if (scenario is ScenarioOutline) {
+            scenario.examples.forEach { examples ->
+                val gherkinExamples = GherkinExamples(examples.name, examples.description, gherkinScenario)
+                examples.tableBody.forEach { tableRow ->
+                    val examplesPairs = tableRow.cells
+                            .mapIndexed { index, tableCell -> Pair(examples.tableHeader.cells[index].value, tableCell.value) }
+                            .toTypedArray()
+                    gherkinExamples.addBinding(mapOf(*examplesPairs))
+                }
+                gherkinScenario.addExamples(gherkinExamples)
+            }
+        }
         return gherkinScenario
     }
 
-    private fun convertStep(scenario: GherkinScenario, stepKeyword: StepKeyword, realKeyword: StepKeyword,  step: Step): GherkinStep {
+    private fun converOutlineToManyScenarios(scenario: GherkinScenario) =
+            scenario.examples.flatMap { example ->
+                example.bindings.map { binding ->
+                    val gherkinScenario = GherkinScenario(scenario.name.fillPlaceholdersWithValues(binding),
+                            scenario.description?.fillPlaceholdersWithValues(binding), scenario.feature, scenario, binding)
+                    scenario.steps.forEach { step ->
+                        val gherkinStep = GherkinStep(step.keyword, step.realKeyword, step.content.fillPlaceholdersWithValues(binding), scenario,
+                                step.data, step.content)
+                        gherkinScenario.addStep(gherkinStep)
+                    }
+                    gherkinScenario
+                }
+            }
+
+
+    private fun convertStep(scenario: GherkinScenario, stepKeyword: StepKeyword, realKeyword: StepKeyword, step: Step): GherkinStep {
         val argument = step.argument
         val data = argument as? DataTable
         return GherkinStep(stepKeyword, realKeyword, step.text, scenario, data?.to2DArray())
@@ -71,7 +109,9 @@ object GherkinLoader {
         return valueOf(keyword.toUpperCase().trim())
     }
 
-    private fun DataTable.to2DArray()
-        = this.rows.map { it.cells.map { it.value }.toTypedArray() }.toTypedArray()
+    private fun DataTable.to2DArray() = this.rows.map { it.cells.map { it.value }.toTypedArray() }.toTypedArray()
 
+
+    private fun String.fillPlaceholdersWithValues(bindings: Map<String, String>) =
+            bindings.toList().fold(this) { acc, binding -> acc.replace("<${binding.first}>", binding.second) }
 }

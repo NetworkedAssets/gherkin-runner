@@ -7,7 +7,8 @@ data class GherkinStep(val keyword: StepKeyword,
                        val realKeyword: StepKeyword,
                        val content: String,
                        @JsonIgnore val scenario: GherkinScenario,
-                       @JsonIgnore val data: Array<Array<String>>? = null) : Serializable {
+                       @JsonIgnore val data: Array<Array<String>>? = null,
+                       val outlinedContent: String? = null) : Serializable {
     val featureName
         get() = this.scenario.feature.name
 
