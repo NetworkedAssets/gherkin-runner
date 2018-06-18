@@ -34,7 +34,8 @@ object GherkinLoader {
     private fun List<GherkinFeature>.filter(featureFilter: String? = null, scenarioFilter: String? = null): List<GherkinFeature> {
         return this.filter { featureFilter == null || it.name == featureFilter }.map {
             val gherkinFeature = GherkinFeature(it.name)
-            gherkinFeature.scenarios.addAll(it.scenarios.filter { scenario -> scenarioFilter == null || scenario.name == scenarioFilter })
+            gherkinFeature.scenarios.addAll(it.scenarios.filter { scenario -> scenarioFilter == null ||
+                    scenario.name == scenarioFilter || scenario.outline?.name == scenarioFilter })
             gherkinFeature
         }
     }
