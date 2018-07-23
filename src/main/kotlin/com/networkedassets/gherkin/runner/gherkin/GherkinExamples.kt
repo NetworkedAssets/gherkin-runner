@@ -5,6 +5,7 @@ import java.io.Serializable
 
 data class GherkinExamples(val name: String,
                            val description: String?,
+                           val tags: List<String>,
                            @JsonIgnore val scenario: GherkinScenario) : Serializable {
     val bindings = mutableListOf<Map<String, String>>()
 

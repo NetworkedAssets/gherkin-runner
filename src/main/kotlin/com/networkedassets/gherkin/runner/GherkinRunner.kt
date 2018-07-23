@@ -25,7 +25,6 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
     private lateinit var features: List<GherkinFeature>
     private lateinit var description: Description
 
-
     val log = KotlinLogging.logger { }
 
     override fun run(notifier: RunNotifier) {
@@ -53,7 +52,7 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
 
         val elasticsearchReporting = Reflection.getElasticsearchReporting(clazz)
         if (elasticsearchReporting != null) {
-            log.info("Elasticsaerch reporting turned on, trying to put report into Elasticsearch")
+            log.info("Elasticsearch reporting turned on, trying to put report into Elasticsearch")
             ElasticsearchReportExporter.reportToElasticsearch(elasticsearchReporting, report)
         }
         log.info("Report has been exported")

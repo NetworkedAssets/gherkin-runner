@@ -3,7 +3,9 @@ package com.networkedassets.gherkin.runner.gherkin
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.io.Serializable
 
-data class GherkinFeature(val name: String) : Serializable {
+data class GherkinFeature(
+        val name: String,
+        val tags: List<String>) : Serializable {
     @JsonIgnore
     val scenarios = mutableListOf<GherkinScenario>()
 
