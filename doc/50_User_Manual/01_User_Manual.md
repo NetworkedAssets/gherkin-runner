@@ -190,7 +190,7 @@ Feature: New businesses
 ```
 
 To implement it you have to use scenario and names of steps from outline, like this:
-```
+```groovy
 @Feature("New businesses")
 class NewBusinessSpec extends FeatureSpecification {
     def "Businesses should provide required data"() {
