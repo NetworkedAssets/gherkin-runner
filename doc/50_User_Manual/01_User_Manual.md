@@ -12,9 +12,9 @@ Maven:
 
 ```xml
 <dependency>
-	<groupId>com.github.NetworkedAssets</groupId>
-	<artifactId>gherkin-runner</artifactId>
-	<version>[commit-hash-or-branch-name]</version>
+    <groupId>com.github.NetworkedAssets</groupId>
+    <artifactId>gherkin-runner</artifactId>
+    <version>[commit-hash-or-branch-name]</version>
     <scope>test</scope>
 </dependency>
 ```
