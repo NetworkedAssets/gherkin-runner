@@ -2,24 +2,24 @@
 
 ## 1. Dependency
 
-To start using Gherkin Runner, add Groovy to your project and following GR dependency:
+To start using Gherkin Runner, add Groovy to your project and following GR dependency using jitpack.io:
 
 Gradle: 
 
-`testCompile "com.networkedassets:gherkin-runner:[gr-version]"`
+`testCompile "com.github.NetworkedAssets:gherkin-runner:[commit-hash-or-branch-name]"`
 
 Maven: 
 
 ```xml
 <dependency>
-    <groupId>com.networkedassets</groupId>
-    <artifactId>gherkin-runner</artifactId>
-    <version>[gr-version]</version>
+	<groupId>com.github.NetworkedAssets</groupId>
+	<artifactId>gherkin-runner</artifactId>
+	<version>[commit-hash-or-branch-name]</version>
     <scope>test</scope>
 </dependency>
 ```
 
-**Gherkin Runner is hosted on jCenter, so it is required to add it to your project's repositories**
+**Gherkin Runner is hosted on jitpack, so it is required to add it to your project's repositories**
 
 ## 2. Main test class
 
@@ -217,3 +217,39 @@ four methods for getting values represented as specified type: getString(), getB
 passed to one of these methods exception will be thrown. The exception will be also thrown, when it will be not possible to convert some value to
 specified type. It is worth of notice, that getBoolean() will return false for values: "false", "n", "no" and ones, which end with "not" or "n't".
 The rest of values will be converted to true.
+
+## 6. Running only scenarios matching given tags condition
+
+You can point Gherkin Runner, which scenarios it should run using tags. You can add tag to any feature, scenario or examples in following way:
+
+```gherkin
+@NewBusinessFeature
+Feature: New businesses
+
+  @SomeTag2
+  Scenario Outline: Businesses should provide required data
+    Given a restaurant <business> on <location>
+    When <business> signs up to Mapper
+    Then it <should?> be added to the platform
+    And its name <should?> appear on the map at <location>
+    
+    @SomeOtherTag
+    Examples: Business name and location should be required
+      | business         | location | should?   |
+      | UNNAMED BUSINESS | NOWHERE  | shouldn't |
+
+    @AnotherTag
+    Examples: Allow only businesses with correct names
+      | business         | location                  | should?   |
+      | Back to Black    | 8114 2nd Street, Stockton | should    |
+      | UNNAMED BUSINESS | 8114 2nd Street, Stockton | shouldn't |
+```
+
+Tags are inherited in following direction feature > scenario > examples. It means, that if feature has @tag1, then all scenarios will also have @tag1.
+You can select, which scenarios should be run using `gherkinTags` JVM property. Value assigned to this property should be correct logical expression,
+in which tags and logical operators like OR, AND, NOT can be used. Example correct tags conditions:
+
+*`@SomeOtherTag` - runs only scenarios with @SomeOtherTag
+*`@SomeOtherTag OR @AnotherTag` - runs only scenarios with @SomeOtherTag or with @AnotherTag
+*`@NewBusinessFeature AND NOT @AnotherTag` - runs only scenarios with @NewBusinessFeature and without @AnotherTag
+*`@NewBusinessFeature AND NOT (@AnotherTag OR @SomeOtherTag)` - runs only scenarios with @NewBusinessFeature and without @AnotherTag and @SomeOtherTag
