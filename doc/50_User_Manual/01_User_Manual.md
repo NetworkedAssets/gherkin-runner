@@ -249,7 +249,7 @@ Tags are inherited in following direction feature > scenario > examples. It mean
 You can select, which scenarios should be run using `gherkinTags` JVM property. Value assigned to this property should be correct logical expression,
 in which tags and logical operators like OR, AND, NOT can be used. Example correct tags conditions:
 
-*`@SomeOtherTag` - runs only scenarios with @SomeOtherTag
-*`@SomeOtherTag OR @AnotherTag` - runs only scenarios with @SomeOtherTag or with @AnotherTag
-*`@NewBusinessFeature AND NOT @AnotherTag` - runs only scenarios with @NewBusinessFeature and without @AnotherTag
-*`@NewBusinessFeature AND NOT (@AnotherTag OR @SomeOtherTag)` - runs only scenarios with @NewBusinessFeature and without @AnotherTag and @SomeOtherTag
+* `@SomeOtherTag` - runs only scenarios with @SomeOtherTag
+* `@SomeOtherTag OR @AnotherTag` - runs only scenarios with @SomeOtherTag or with @AnotherTag
+* `@NewBusinessFeature AND NOT @AnotherTag` - runs only scenarios with @NewBusinessFeature and without @AnotherTag
+* `@NewBusinessFeature AND NOT (@AnotherTag OR @SomeOtherTag)` - runs only scenarios with @NewBusinessFeature and without @AnotherTag and @SomeOtherTag
