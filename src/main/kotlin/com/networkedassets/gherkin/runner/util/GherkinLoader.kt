@@ -55,14 +55,14 @@ object GherkinLoader {
                     && matchToTagsExpression(tagsExpression, scenario.tags)
 
     private fun matchToTagsExpression(expression: String?, tags: List<String>): Boolean {
-        return if (expression != null) {
-            val replacedInput = expression.replace(" AND ", " && ").replace(" OR ", " || ").replace(" NOT ", " !").replace(" NOT(", " !(")
+        return if (!expression.isNullOrEmpty()) {
+            val replacedInput = expression!!.replace(" AND ", " && ").replace(" OR ", " || ").replace(" NOT ", " !").replace(" NOT(", " !(")
             val withTagsInput = replacedInput.replace("@[^\\s)]+".toRegex()) {
                 tags.contains(it.value).toString()
             }
             try {
                 ScriptEngineManager().getEngineByName("javascript").eval(withTagsInput) as Boolean
-            } catch (e: ScriptException) {
+            } catch (e: Exception) {
                 throw InvalidTagsExpressionException("Tags expression '$expression' is invalid and can not be parsed!", e)
             }
         } else true
