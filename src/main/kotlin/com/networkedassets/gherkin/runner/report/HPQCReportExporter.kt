@@ -9,7 +9,7 @@ import java.io.FileOutputStream
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class HPQCExporter: ReportExporter {
+class HPQCReportExporter: ReportExporter {
     override val name = "HPQC"
 
     override fun export(report: Report) {

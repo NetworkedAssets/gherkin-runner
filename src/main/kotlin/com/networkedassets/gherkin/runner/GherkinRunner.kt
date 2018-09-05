@@ -2,9 +2,10 @@ package com.networkedassets.gherkin.runner
 
 import com.networkedassets.gherkin.runner.gherkin.GherkinFeature
 import com.networkedassets.gherkin.runner.report.ElasticsearchReportExporter
-import com.networkedassets.gherkin.runner.report.HPQCExporter
+import com.networkedassets.gherkin.runner.report.HPQCReportExporter
 import com.networkedassets.gherkin.runner.report.HTMLReportExporter
 import com.networkedassets.gherkin.runner.report.JSONReportExporter
+import com.networkedassets.gherkin.runner.report.JUnitReportExporter
 import com.networkedassets.gherkin.runner.report.ReportExporter
 import com.networkedassets.gherkin.runner.report.data.Report
 import com.networkedassets.gherkin.runner.runners.FeatureRunner
@@ -44,7 +45,8 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
         val extensions = mutableSetOf<KClass<*>>(
                 JSONReportExporter::class,
                 HTMLReportExporter::class,
-                HPQCExporter::class)
+                HPQCReportExporter::class,
+                JUnitReportExporter::class)
         extensions.addAll(Reflection.getExtensions(clazz) ?: setOf())
         val reports = Reflection.getReports(clazz) ?: setOf("HTML")
 

@@ -12,6 +12,10 @@ buildscript {
     }
 }
 
+plugins {
+    id 'de.qaware.gradle.plugin.xsd2java' version '1.0.0'
+}
+
 apply plugin: "java"
 apply plugin: 'kotlin'
 apply plugin: 'groovy'
@@ -50,6 +54,25 @@ publishing {
     }
 }
 
+xsd2java {
+    schemas {
+        generateJUnitSchema {
+            schemaDirPath "src/main/resources/xsd"
+            packageName "com.networkedassets.gherkin.runner.junit"
+        }
+    }
+    extension true
+    arguments ['-verbose']
+    outputDir new File("${project.buildDir}/junit-generated")
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs "${project.buildDir}/junit-generated"
+        }
+    }
+}
 
 dependencies {
     compile "org.codehaus.groovy:groovy-all:$groovyVersion"
