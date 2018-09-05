@@ -77,22 +77,25 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
         if(!::description.isInitialized) {
             description = Description.createSuiteDescription("GherkinRunner")
             features.forEach { feature ->
-                val featureSuiteDescription = Description.createSuiteDescription(feature.name)
-                val beforeFeature = Description.createTestDescription(feature.name, "> Before feature")
+                val featureName = feature.name.replaceDotsWithIntelliJFriendlyDots()
+                val featureSuiteDescription = Description.createSuiteDescription(featureName)
+                val beforeFeature = Description.createTestDescription(featureName, "> Before feature")
                 featureSuiteDescription.addChild(beforeFeature)
                 feature.scenarios.forEach { scenario ->
-                    val scenarioSuiteDescription = Description.createSuiteDescription(scenario.name)
-                    val beforeScenario = Description.createTestDescription(scenario.name, "> Before scenario")
+                    val scenarioName = scenario.name.replaceDotsWithIntelliJFriendlyDots()
+                    val scenarioSuiteDescription = Description.createSuiteDescription(scenarioName)
+                    val beforeScenario = Description.createTestDescription(scenarioName, "> Before scenario")
                     scenarioSuiteDescription.addChild(beforeScenario)
                     scenario.steps.forEach { step ->
-                        val stepDescription = Description.createTestDescription(scenario.name, step.fullContent)
+                        val stepContent = step.fullContent.replaceDotsWithIntelliJFriendlyDots()
+                        val stepDescription = Description.createTestDescription(scenarioName, stepContent)
                         scenarioSuiteDescription.addChild(stepDescription)
                     }
-                    val afterScenario = Description.createTestDescription(scenario.name, "> After scenario")
+                    val afterScenario = Description.createTestDescription(scenarioName, "> After scenario")
                     scenarioSuiteDescription.addChild(afterScenario)
                     featureSuiteDescription.addChild(scenarioSuiteDescription)
                 }
-                val afterFeature = Description.createTestDescription(feature.name, "> After feature")
+                val afterFeature = Description.createTestDescription(featureName, "> After feature")
                 featureSuiteDescription.addChild(afterFeature)
                 description.addChild(featureSuiteDescription)
             }
@@ -102,4 +105,6 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
     private fun initializeFeatures() {
         if(!::features.isInitialized) features = GherkinLoader.loadFeatures(featureFilter = featureFilter, scenarioFilter = scenarioFilter)
     }
+
+    private fun String.replaceDotsWithIntelliJFriendlyDots() = this.replace('.', '․')
 }
