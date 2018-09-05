@@ -39,14 +39,14 @@ class JUnitReportExporter : ReportExporter {
             properties = Properties()
             systemOut = featureReport.log.joinToString("\n") { it.message }
             systemErr = ""
-            val testcases = featureReport.scenarioReports.map(::convertScenarioReportToTestcase)
+            val testcases = featureReport.scenarioReports.map { convertScenarioReportToTestcase(featureReport.feature.name, it) }
             testcase.addAll(testcases)
         }
 
-    private fun convertScenarioReportToTestcase(scenarioReport: ScenarioReport) =
+    private fun convertScenarioReportToTestcase(featureName: String, scenarioReport: ScenarioReport) =
         Testcase().apply {
             name = scenarioReport.scenario.name
-            classname = scenarioReport.scenario.name
+            classname = featureName
             time = (scenarioReport.executionTime / 1000.0).toString()
             val failures = scenarioReport.stepReports.filter { scenarioReport.state == ReportState.FAILED }.map {
                 Failure().apply {
