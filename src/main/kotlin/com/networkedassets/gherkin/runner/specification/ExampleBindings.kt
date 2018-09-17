@@ -5,6 +5,8 @@ class ExampleBindings(val bindings: Map<String, String>?) {
 
     fun getInt(name: String) = getString(name).toIntOrNull() ?: throw Exception("Binding for '$name' is not integer value")
 
+    fun getLong(name: String) = getString(name).toLongOrNull() ?: throw Exception("Binding for '$name' is not integer value")
+
     fun getDouble(name: String) = getString(name).toDoubleOrNull() ?: throw Exception("Binding for '$name' is not floating point value")
 
     fun getBoolean(name: String): Boolean {
