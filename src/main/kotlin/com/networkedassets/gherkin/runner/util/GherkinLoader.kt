@@ -25,6 +25,7 @@ object GherkinLoader {
         return fileNames.map({ readFeatureFromFile(it) }).filter(featureFilter, scenarioFilter)
     }
 
+    @JvmStatic
     fun loadGenericGherkinData(path: String) : gherkin.ast.Feature {
         log.info { "Reading feature file: '$path'" }
         val parser = Parser<GherkinDocument>(AstBuilder())
