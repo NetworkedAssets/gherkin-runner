@@ -11,7 +11,6 @@ import org.reflections.Reflections
 import org.reflections.scanners.ResourcesScanner
 import java.util.regex.Pattern
 import javax.script.ScriptEngineManager
-import javax.script.ScriptException
 
 
 object GherkinLoader {
@@ -25,6 +24,15 @@ object GherkinLoader {
         val fileNames = reflections.getResources(Pattern.compile(".*\\.feature"))
         return fileNames.map({ readFeatureFromFile(it) }).filter(featureFilter, scenarioFilter)
     }
+
+    fun loadGenericGherkinData(path: String) : gherkin.ast.Feature {
+        log.info { "Reading feature file: '$path'" }
+        val parser = Parser<GherkinDocument>(AstBuilder())
+        val featureFileContent = this.javaClass.classLoader.getResource(path).readText()
+        val gherkinDocument = parser.parse(featureFileContent)
+        return gherkinDocument.feature
+    }
+
 
     private fun readFeatureFromFile(path: String): GherkinFeature {
         log.info { "Reading feature file: '$path'" }
