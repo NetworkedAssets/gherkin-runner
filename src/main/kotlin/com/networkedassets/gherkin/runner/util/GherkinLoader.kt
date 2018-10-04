@@ -5,7 +5,7 @@ import com.networkedassets.gherkin.runner.gherkin.GherkinFeature
 import com.networkedassets.gherkin.runner.gherkin.GherkinScenario
 import gherkin.AstBuilder
 import gherkin.Parser
-import gherkin.ast.GherkinDocument
+import gherkin.ast.*
 import mu.KotlinLogging
 import org.reflections.Reflections
 import org.reflections.scanners.ResourcesScanner
@@ -26,12 +26,13 @@ object GherkinLoader {
     }
 
     @JvmStatic
-    fun loadGenericGherkinData(path: String) : gherkin.ast.Feature {
+    fun loadBackground(path: String): Array<Array<String>>? {
         log.info { "Reading feature file: '$path'" }
         val parser = Parser<GherkinDocument>(AstBuilder())
         val featureFileContent = this.javaClass.classLoader.getResource(path).readText()
         val gherkinDocument = parser.parse(featureFileContent)
-        return gherkinDocument.feature
+        val dt =  gherkinDocument.feature.children.filter { chld -> chld is Background  }[0].steps[0].argument as? DataTable
+        return dt?.rows?.map { it.cells.map { it.value }.toTypedArray() }?.toTypedArray()
     }
 
 
