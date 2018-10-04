@@ -8,6 +8,7 @@ import com.networkedassets.gherkin.runner.report.data.CallbackType
 import com.networkedassets.gherkin.runner.report.data.Report
 import com.networkedassets.gherkin.runner.specification.FeatureSpecification
 import com.networkedassets.gherkin.runner.util.Reflection
+import gherkin.ast.DataTable
 import mu.KotlinLogging
 import org.junit.runner.Description
 import org.junit.runner.notification.RunNotifier
@@ -27,7 +28,8 @@ class FeatureRunner(private val implementationsPackage: String,
         featureReport.start()
         try {
             val featureSpecification = Reflection.getFeatureSpecification(implementationsPackage, feature)
-            featureSpecification.background = feature.background
+            val node = feature.background.steps?.first()?.argument as DataTable
+            featureSpecification.background = node.rows.map { it.cells.map { it.value }.toTypedArray() }.toTypedArray()
             runImplemented(featureSpecification)
         } catch (e: NotFoundImplementationException) {
             runNotImplemented()
