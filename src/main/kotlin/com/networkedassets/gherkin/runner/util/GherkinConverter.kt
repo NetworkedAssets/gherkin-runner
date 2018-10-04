@@ -5,17 +5,13 @@ import com.networkedassets.gherkin.runner.gherkin.GherkinFeature
 import com.networkedassets.gherkin.runner.gherkin.GherkinScenario
 import com.networkedassets.gherkin.runner.gherkin.GherkinStep
 import com.networkedassets.gherkin.runner.gherkin.StepKeyword
-import gherkin.ast.DataTable
-import gherkin.ast.Examples
-import gherkin.ast.Feature
-import gherkin.ast.Scenario
-import gherkin.ast.ScenarioDefinition
-import gherkin.ast.ScenarioOutline
-import gherkin.ast.Step
+import gherkin.ast.*
 
 object GherkinConverter {
     fun convertFeature(feature: Feature): GherkinFeature {
-        val gherkinFeature = GherkinFeature(feature.name, feature.tags.map { it.name })
+        val gherkinFeature = GherkinFeature(feature.name,
+                feature.children.filterIsInstance<Background>().first(),
+                feature.tags.map { it.name })
         feature.children
                 .flatMap {
                     val scenario = convertScenario(gherkinFeature, it)

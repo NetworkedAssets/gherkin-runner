@@ -32,6 +32,8 @@ class CallbackRunner(private val callbackDescription: Description,
         featureCallbackReport.start()
         try {
             val callbackMethod = Reflection.getCallbackMethod(featureSpecification, callbackType)
+            val parameters = callbackMethod.parameters
+
             runImplemented(featureSpecification, callbackMethod)
         } catch (e: NotFoundImplementationException) {
             runNotImplemented()
