@@ -15,7 +15,7 @@ object GherkinConverter {
                 }.forEach({
                     gherkinFeature.addScenario(it)
                 })
-        gherkinFeature.backgrounds = convertBackground(feature)
+        gherkinFeature.addBackgrounds(convertBackground(feature))
         return gherkinFeature
     }
 
@@ -58,15 +58,8 @@ object GherkinConverter {
         return gherkinScenario
     }
 
-    private fun convertBackground(feature: Feature): GherkinBackground {
-        val step = feature.children.filter { chld ->
-            chld is Background }
-        if (!step.isEmpty()) {
-            val first = step.first().steps?.first()
-            val dataTable = first?.argument as? DataTable
-            return GherkinBackground(first?.text, dataTable?.to2DArray())
-        }
-        return GherkinBackground("No background found for suite", null)
+    private fun convertBackground(feature: Feature): List<Background> {
+        return feature.children.filterIsInstance<Background>()
     }
 
     private fun convertExamples(examples: Examples,

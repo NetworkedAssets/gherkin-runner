@@ -1,14 +1,6 @@
 package com.networkedassets.gherkin.runner.util
 
-import com.networkedassets.gherkin.runner.annotation.AfterFeature
-import com.networkedassets.gherkin.runner.annotation.AfterScenario
-import com.networkedassets.gherkin.runner.annotation.BeforeFeature
-import com.networkedassets.gherkin.runner.annotation.BeforeScenario
-import com.networkedassets.gherkin.runner.annotation.ElasticSearchReporting
-import com.networkedassets.gherkin.runner.annotation.Extensions
-import com.networkedassets.gherkin.runner.annotation.Feature
-import com.networkedassets.gherkin.runner.annotation.ImplementationsPackage
-import com.networkedassets.gherkin.runner.annotation.Reports
+import com.networkedassets.gherkin.runner.annotation.*
 import com.networkedassets.gherkin.runner.exception.MultipleImplementationsException
 import com.networkedassets.gherkin.runner.exception.NotFoundImplementationException
 import com.networkedassets.gherkin.runner.gherkin.GherkinFeature
@@ -38,7 +30,7 @@ object Reflection {
             throw NotFoundImplementationException("Feature implementation not found for $featureName")
         }
         val featureSpecification = featureClasses.first().newInstance() as FeatureSpecification
-        featureSpecification.background = feature.backgrounds?.data!!
+        featureSpecification.backgrounds = feature.backgrounds
         return featureSpecification
     }
 
@@ -56,7 +48,8 @@ object Reflection {
 
     fun getClosureForStep(stepDefs: Map<Pair<StepKeyword, String>, Closure<Any>>, step: GherkinStep): Closure<Any> {
         val stepContent = step.outlinedContent ?: step.content
-        return stepDefs[Pair(step.realKeyword, stepContent)] ?: throw NotFoundImplementationException("Step implementation not found for ${step.fullTree}")
+        return stepDefs[Pair(step.realKeyword, stepContent)]
+                ?: throw NotFoundImplementationException("Step implementation not found for ${step.fullTree}")
     }
 
     fun getCallbackMethod(featureSpecification: FeatureSpecification, callbackType: CallbackType): Method {
@@ -70,7 +63,7 @@ object Reflection {
 
     private fun getCallbackMethod(featureSpecification: FeatureSpecification, annotationClass: KClass<out Annotation>): Method {
         val callbackMethods = featureSpecification.javaClass.methods
-            .filter({ it.getAnnotation(annotationClass.java) != null })
+                .filter({ it.getAnnotation(annotationClass.java) != null })
         if (callbackMethods.size > 1) {
             throw MultipleImplementationsException("Multiple ${annotationClass.simpleName} callback implementations for ${featureSpecification::class.simpleName}")
         } else if (callbackMethods.isEmpty()) {
@@ -82,10 +75,11 @@ object Reflection {
     fun getGherkinRunnerMetadata(runnerClass: Class<*>): RunnerMetadata {
         try {
             val metadataMethod = runnerClass.getMethod("metadata")
-            if (metadataMethod.returnType.isAssignableFrom(RunnerMetadata::class.java))  {
+            if (metadataMethod.returnType.isAssignableFrom(RunnerMetadata::class.java)) {
                 metadataMethod.invoke(runnerClass.newInstance()) as RunnerMetadata
             }
-        } catch (ignore: NoSuchMethodException) {}
+        } catch (ignore: NoSuchMethodException) {
+        }
         return RunnerMetadata()
     }
 
