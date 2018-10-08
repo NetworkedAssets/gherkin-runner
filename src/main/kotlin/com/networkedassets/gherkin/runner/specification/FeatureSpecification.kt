@@ -12,7 +12,7 @@ import org.junit.runner.RunWith
 open class FeatureSpecification {
     val stepDefs = mutableMapOf<Pair<StepKeyword, String>, Closure<Any>>()
     lateinit var bindings: ExampleBindings
-    lateinit var backgrounds: List<Background>
+    val backgrounds = mutableListOf<Background>()
     private var lastType: StepKeyword = GIVEN
 
     fun given(stepText: String, closure: Closure<Any>) {
