@@ -60,9 +60,14 @@ object GherkinLoader {
 
 
         val step = feature.children.filter { chld -> println(chld)
-            chld is Background }.first().steps?.first()
-        val dataTable = step?.argument as? DataTable
-        return GherkinBackground(step?.text, dataTable?.to2DArray())
+            chld is Background }.first()
+        println("STEP:" + step.keyword)
+        val first = step.steps
+        println("FIRST: " + first)
+        val first1 = first.first()
+        println("FIRST 1" + first1.argument)
+        val dataTable = first1?.argument as? DataTable
+        return GherkinBackground(first1?.text, dataTable?.to2DArray())
     }
 
     private fun List<GherkinFeature>.filter(featureFilter: String? = null, scenarioFilter: String? = null): List<GherkinFeature> {
