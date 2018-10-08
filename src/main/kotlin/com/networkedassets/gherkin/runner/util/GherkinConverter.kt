@@ -7,7 +7,6 @@ object GherkinConverter {
     fun convertFeature(feature: Feature): GherkinFeature {
         val gherkinFeature = GherkinFeature(feature.name,
                 feature.tags.map { it.name })
-
         feature.children
                 .flatMap {
                     val scenario = convertScenario(gherkinFeature, it)
@@ -16,6 +15,7 @@ object GherkinConverter {
                 }.forEach({
                     gherkinFeature.addScenario(it)
                 })
+        gherkinFeature.backgrounds = convertBackground(feature)
         return gherkinFeature
     }
 
@@ -58,6 +58,17 @@ object GherkinConverter {
         return gherkinScenario
     }
 
+    private fun convertBackground(feature: Feature): GherkinBackground {
+        val step = feature.children.filter { chld ->
+            chld is Background }
+        if (!step.isEmpty()) {
+            val first = step.first().steps?.first()
+            val dataTable = first?.argument as? DataTable
+            return GherkinBackground(first?.text, dataTable?.to2DArray())
+        }
+        return GherkinBackground("No background found for suite", null)
+    }
+
     private fun convertExamples(examples: Examples,
                                 gherkinScenario: GherkinScenario): GherkinExamples {
         val examplesTags = examples.tags.map { it.name }
@@ -82,7 +93,7 @@ object GherkinConverter {
         return StepKeyword.valueOf(keyword.toUpperCase().trim())
     }
 
-    fun DataTable.to2DArray() = this.rows.map { it.cells.map { it.value }.toTypedArray() }.toTypedArray()
+    private fun DataTable.to2DArray() = this.rows.map { it.cells.map { it.value }.toTypedArray() }.toTypedArray()
 
     private fun String.fillPlaceholdersWithValues(bindings: Map<String, String>) =
             bindings.toList().fold(this) { acc, binding -> acc.replace("<${binding.first}>", binding.second) }

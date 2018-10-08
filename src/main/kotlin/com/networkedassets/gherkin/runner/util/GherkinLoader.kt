@@ -1,15 +1,10 @@
 package com.networkedassets.gherkin.runner.util
 
 import com.networkedassets.gherkin.runner.exception.InvalidTagsExpressionException
-import com.networkedassets.gherkin.runner.gherkin.GherkinBackground
 import com.networkedassets.gherkin.runner.gherkin.GherkinFeature
 import com.networkedassets.gherkin.runner.gherkin.GherkinScenario
-import com.networkedassets.gherkin.runner.util.GherkinConverter.to2DArray
 import gherkin.AstBuilder
 import gherkin.Parser
-import gherkin.ast.Background
-import gherkin.ast.DataTable
-import gherkin.ast.Feature
 import gherkin.ast.GherkinDocument
 import mu.KotlinLogging
 import org.reflections.Reflections
@@ -27,11 +22,9 @@ object GherkinLoader {
         log.info { "Loading feature specifications from package: '$packagePrefix' with feature filter: '$featureFilter' and scenario filter: '$scenarioFilter'" }
         val reflections = Reflections(packagePrefix, ResourcesScanner())
         val fileNames = reflections.getResources(Pattern.compile(".*\\.feature"))
-        val filter = fileNames.map({
+        return fileNames.map({
             readFeatureFromFile(it)
         }).filter(featureFilter, scenarioFilter)
-
-        return filter
     }
 
     private fun readFeatureFromFile(path: String): GherkinFeature {
@@ -40,21 +33,7 @@ object GherkinLoader {
         val featureFileContent = this.javaClass.classLoader.getResource(path).readText()
         val gherkinDocument = parser.parse(featureFileContent)
         val feature = gherkinDocument.feature
-        val convertFeature = GherkinConverter.convertFeature(feature)
-        convertFeature.backgrounds = convertBackground(feature)
-
-        return convertFeature
-    }
-
-    private fun convertBackground(feature: Feature): GherkinBackground {
-        val step = feature.children.filter { chld ->
-            chld is Background }
-        if (!step.isEmpty()) {
-            val first = step.first().steps?.first()
-            val dataTable = first?.argument as? DataTable
-            return GherkinBackground(first?.text, dataTable?.to2DArray())
-        }
-        return GherkinBackground("No background found for suite", null)
+        return GherkinConverter.convertFeature(feature)
     }
 
     private fun List<GherkinFeature>.filter(featureFilter: String? = null, scenarioFilter: String? = null): List<GherkinFeature> {

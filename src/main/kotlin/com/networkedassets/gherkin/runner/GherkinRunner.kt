@@ -5,7 +5,7 @@ import com.networkedassets.gherkin.runner.report.ElasticsearchReportExporter
 import com.networkedassets.gherkin.runner.report.HPQCReportExporter
 import com.networkedassets.gherkin.runner.report.HTMLReportExporter
 import com.networkedassets.gherkin.runner.report.JSONReportExporter
-//import com.networkedassets.gherkin.runner.report.JUnitReportExporter
+import com.networkedassets.gherkin.runner.report.JUnitReportExporter
 import com.networkedassets.gherkin.runner.report.ReportExporter
 import com.networkedassets.gherkin.runner.report.data.Report
 import com.networkedassets.gherkin.runner.runners.FeatureRunner
@@ -25,7 +25,6 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
     private var scenarioFilter: String? = null
     private lateinit var features: List<GherkinFeature>
     private lateinit var description: Description
-
 
     val log = KotlinLogging.logger { }
 
@@ -47,7 +46,8 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
         val extensions = mutableSetOf<KClass<*>>(
                 JSONReportExporter::class,
                 HTMLReportExporter::class,
-                HPQCReportExporter::class)
+                HPQCReportExporter::class,
+                JUnitReportExporter::class)
         extensions.addAll(Reflection.getExtensions(clazz) ?: setOf())
         val reports = Reflection.getReports(clazz) ?: setOf("HTML")
 
@@ -81,7 +81,6 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
             description = Description.createSuiteDescription("GherkinRunner")
             features.forEach { feature ->
                 val featureName = feature.name.replaceDotsWithIntelliJFriendlyDots()
-
                 val featureSuiteDescription = Description.createSuiteDescription(featureName)
                 val beforeFeature = Description.createTestDescription(featureName, "> Before feature")
                 featureSuiteDescription.addChild(beforeFeature)
