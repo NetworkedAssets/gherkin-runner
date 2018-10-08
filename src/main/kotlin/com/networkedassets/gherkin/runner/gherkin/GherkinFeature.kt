@@ -9,6 +9,9 @@ data class GherkinFeature(
     @JsonIgnore
     val scenarios = mutableListOf<GherkinScenario>()
 
+    @JsonIgnore
+    var backgrounds: GherkinBackground? = null
+
     fun addScenario(scenario: GherkinScenario) {
         scenarios.add(scenario)
     }

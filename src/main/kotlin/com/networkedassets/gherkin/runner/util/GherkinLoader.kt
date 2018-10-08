@@ -1,11 +1,16 @@
 package com.networkedassets.gherkin.runner.util
 
 import com.networkedassets.gherkin.runner.exception.InvalidTagsExpressionException
+import com.networkedassets.gherkin.runner.gherkin.GherkinBackground
 import com.networkedassets.gherkin.runner.gherkin.GherkinFeature
 import com.networkedassets.gherkin.runner.gherkin.GherkinScenario
+import com.networkedassets.gherkin.runner.util.GherkinConverter.to2DArray
 import gherkin.AstBuilder
 import gherkin.Parser
-import gherkin.ast.*
+import gherkin.ast.Background
+import gherkin.ast.DataTable
+import gherkin.ast.Feature
+import gherkin.ast.GherkinDocument
 import mu.KotlinLogging
 import org.reflections.Reflections
 import org.reflections.scanners.ResourcesScanner
@@ -22,17 +27,20 @@ object GherkinLoader {
         log.info { "Loading feature specifications from package: '$packagePrefix' with feature filter: '$featureFilter' and scenario filter: '$scenarioFilter'" }
         val reflections = Reflections(packagePrefix, ResourcesScanner())
         val fileNames = reflections.getResources(Pattern.compile(".*\\.feature"))
-        return fileNames.map({ readFeatureFromFile(it) }).filter(featureFilter, scenarioFilter)
+        val filter = fileNames.map({
+            readFeatureFromFile(it)
+        }).filter(featureFilter, scenarioFilter)
+
+        return filter
     }
 
     @JvmStatic
-    fun loadBackground(path: String): Array<Array<String>>? {
+    fun loadGenericGherkinData(path: String): gherkin.ast.Feature {
         log.info { "Reading feature file: '$path'" }
         val parser = Parser<GherkinDocument>(AstBuilder())
         val featureFileContent = this.javaClass.classLoader.getResource(path).readText()
         val gherkinDocument = parser.parse(featureFileContent)
-        val dt =  gherkinDocument.feature.children.filter { chld -> chld is Background  }[0].steps[0].argument as? DataTable
-        return dt?.rows?.map { it.cells.map { it.value }.toTypedArray() }?.toTypedArray()
+        return gherkinDocument.feature
     }
 
 
@@ -42,15 +50,26 @@ object GherkinLoader {
         val featureFileContent = this.javaClass.classLoader.getResource(path).readText()
         val gherkinDocument = parser.parse(featureFileContent)
         val feature = gherkinDocument.feature
-        return GherkinConverter.convertFeature(feature)
+        val convertFeature = GherkinConverter.convertFeature(feature)
+        convertFeature.backgrounds = convertBackground(feature)
+
+        return convertFeature
+    }
+
+    private fun convertBackground(feature: Feature): GherkinBackground {
+        val step = feature.children.filter { chld -> chld is Background }.first().steps?.first()
+        val dataTable = step?.argument as? DataTable
+        return GherkinBackground(step?.text, dataTable?.to2DArray())
     }
 
     private fun List<GherkinFeature>.filter(featureFilter: String? = null, scenarioFilter: String? = null): List<GherkinFeature> {
         val tagsExpression = System.getProperty("gherkinTags")
-        if(!tagsExpression.isNullOrBlank()) log.info { "Filtering features and scenarios using expression: '$tagsExpression'" }
+        if (!tagsExpression.isNullOrBlank()) log.info { "Filtering features and scenarios using expression: '$tagsExpression'" }
         return this.filter { filterFeature(it, featureFilter) }.map {
             val gherkinFeature = it.copy()
+            gherkinFeature.backgrounds = it.backgrounds
             gherkinFeature.scenarios.addAll(it.scenarios.filter { filterScenario(it, scenarioFilter, tagsExpression) })
+
             gherkinFeature
         }.filter { it.scenarios.size > 0 }
     }

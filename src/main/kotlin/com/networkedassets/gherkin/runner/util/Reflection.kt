@@ -37,7 +37,9 @@ object Reflection {
         } else if (featureClasses.isEmpty()) {
             throw NotFoundImplementationException("Feature implementation not found for $featureName")
         }
-        return featureClasses.first().newInstance() as FeatureSpecification
+        val featureSpecification = featureClasses.first().newInstance() as FeatureSpecification
+        featureSpecification.background = feature.backgrounds?.data!!
+        return featureSpecification
     }
 
     fun getMethodForScenario(featureSpecification: FeatureSpecification, scenario: GherkinScenario): Method {

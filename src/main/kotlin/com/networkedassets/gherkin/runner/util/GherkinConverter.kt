@@ -1,27 +1,21 @@
 package com.networkedassets.gherkin.runner.util
 
-import com.networkedassets.gherkin.runner.gherkin.GherkinExamples
-import com.networkedassets.gherkin.runner.gherkin.GherkinFeature
-import com.networkedassets.gherkin.runner.gherkin.GherkinScenario
-import com.networkedassets.gherkin.runner.gherkin.GherkinStep
-import com.networkedassets.gherkin.runner.gherkin.StepKeyword
-import gherkin.ast.DataTable
-import gherkin.ast.Examples
-import gherkin.ast.Feature
-import gherkin.ast.Scenario
-import gherkin.ast.ScenarioDefinition
-import gherkin.ast.ScenarioOutline
-import gherkin.ast.Step
+import com.networkedassets.gherkin.runner.gherkin.*
+import gherkin.ast.*
 
 object GherkinConverter {
     fun convertFeature(feature: Feature): GherkinFeature {
-        val gherkinFeature = GherkinFeature(feature.name, feature.tags.map { it.name })
+        val gherkinFeature = GherkinFeature(feature.name,
+                feature.tags.map { it.name })
+
         feature.children
                 .flatMap {
                     val scenario = convertScenario(gherkinFeature, it)
                     if (scenario.isOutline) converOutlineToManyScenarios(scenario)
                     else listOf(scenario)
-                }.forEach({ gherkinFeature.addScenario(it) })
+                }.forEach({
+                    gherkinFeature.addScenario(it)
+                })
         return gherkinFeature
     }
 
@@ -88,7 +82,7 @@ object GherkinConverter {
         return StepKeyword.valueOf(keyword.toUpperCase().trim())
     }
 
-    private fun DataTable.to2DArray() = this.rows.map { it.cells.map { it.value }.toTypedArray() }.toTypedArray()
+    fun DataTable.to2DArray() = this.rows.map { it.cells.map { it.value }.toTypedArray() }.toTypedArray()
 
     private fun String.fillPlaceholdersWithValues(bindings: Map<String, String>) =
             bindings.toList().fold(this) { acc, binding -> acc.replace("<${binding.first}>", binding.second) }
