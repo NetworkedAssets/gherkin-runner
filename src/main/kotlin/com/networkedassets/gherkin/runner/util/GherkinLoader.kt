@@ -60,11 +60,14 @@ object GherkinLoader {
 
 
         val step = feature.children.filter { chld ->
-            chld is Background }.first()
-        val first = step.steps
-        val first1 = first.first()
-        val dataTable = first1?.argument as? DataTable
-        return GherkinBackground(first1?.text, dataTable?.to2DArray())
+            chld is Background }
+        if (!step.isEmpty()) {
+            val first = step.first().steps
+            val first1 = first.first()
+            val dataTable = first1?.argument as? DataTable
+            return GherkinBackground(first1?.text, dataTable?.to2DArray())
+        }
+        return GherkinBackground("No background found for suite", null)
     }
 
     private fun List<GherkinFeature>.filter(featureFilter: String? = null, scenarioFilter: String? = null): List<GherkinFeature> {
