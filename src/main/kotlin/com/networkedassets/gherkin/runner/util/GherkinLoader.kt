@@ -57,8 +57,6 @@ object GherkinLoader {
     }
 
     private fun convertBackground(feature: Feature): GherkinBackground {
-
-
         val step = feature.children.filter { chld ->
             chld is Background }
         if (!step.isEmpty()) {
