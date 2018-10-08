@@ -57,7 +57,10 @@ object GherkinLoader {
     }
 
     private fun convertBackground(feature: Feature): GherkinBackground {
-        val step = feature.children.filter { chld -> chld is Background }.first().steps?.first()
+
+
+        val step = feature.children.filter { chld -> println(chld)
+            chld is Background }.first().steps?.first()
         val dataTable = step?.argument as? DataTable
         return GherkinBackground(step?.text, dataTable?.to2DArray())
     }
