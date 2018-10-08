@@ -34,16 +34,6 @@ object GherkinLoader {
         return filter
     }
 
-    @JvmStatic
-    fun loadGenericGherkinData(path: String): gherkin.ast.Feature {
-        log.info { "Reading feature file: '$path'" }
-        val parser = Parser<GherkinDocument>(AstBuilder())
-        val featureFileContent = this.javaClass.classLoader.getResource(path).readText()
-        val gherkinDocument = parser.parse(featureFileContent)
-        return gherkinDocument.feature
-    }
-
-
     private fun readFeatureFromFile(path: String): GherkinFeature {
         log.info { "Reading feature file: '$path'" }
         val parser = Parser<GherkinDocument>(AstBuilder())
