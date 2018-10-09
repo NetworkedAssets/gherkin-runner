@@ -4,7 +4,7 @@ import gherkin.ast.Background
 import gherkin.ast.DataTable
 import gherkin.ast.Step
 
-class GherkinBackground(val background: List<Background>) {
+class GherkinBackground(private val background: List<Background>) {
     fun getSteps(): List<Step> {
         return background.map { back -> back.steps }.flatten()
     }
