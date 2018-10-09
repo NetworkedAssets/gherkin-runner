@@ -6,7 +6,7 @@ import gherkin.ast.*
 object GherkinConverter {
     fun convertFeature(feature: Feature): GherkinFeature {
         val gherkinFeature = GherkinFeature(feature.name,
-                feature.tags.map { it.name })
+                feature.tags.map { it.name }, convertBackground(feature))
         feature.children
                 .flatMap {
                     val scenario = convertScenario(gherkinFeature, it)
@@ -15,7 +15,6 @@ object GherkinConverter {
                 }.forEach({
                     gherkinFeature.addScenario(it)
                 })
-        gherkinFeature.addBackgrounds(convertBackground(feature))
         return gherkinFeature
     }
 
@@ -58,8 +57,9 @@ object GherkinConverter {
         return gherkinScenario
     }
 
-    private fun convertBackground(feature: Feature): List<Background> {
-        return feature.children.filterIsInstance<Background>()
+    private fun convertBackground(feature: Feature): GherkinBackground {
+        val filteredBackgr = feature.children.filterIsInstance<Background>()
+        return GherkinBackground(filteredBackgr)
     }
 
     private fun convertExamples(examples: Examples,

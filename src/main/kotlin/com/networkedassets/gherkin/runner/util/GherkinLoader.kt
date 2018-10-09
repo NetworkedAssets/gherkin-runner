@@ -41,7 +41,7 @@ object GherkinLoader {
         if (!tagsExpression.isNullOrBlank()) log.info { "Filtering features and scenarios using expression: '$tagsExpression'" }
         return this.filter { filterFeature(it, featureFilter) }.map {
             val gherkinFeature = it.copy()
-            gherkinFeature.backgrounds.addAll(it.backgrounds)
+            gherkinFeature.backgrounds = it.backgrounds
             gherkinFeature.scenarios.addAll(it.scenarios.filter { filterScenario(it, scenarioFilter, tagsExpression) })
             gherkinFeature
         }.filter { it.scenarios.size > 0 }

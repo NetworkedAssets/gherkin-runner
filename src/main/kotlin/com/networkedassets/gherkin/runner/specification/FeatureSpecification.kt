@@ -1,9 +1,9 @@
 package com.networkedassets.gherkin.runner.specification
 
 import com.networkedassets.gherkin.runner.GherkinRunner
+import com.networkedassets.gherkin.runner.gherkin.GherkinBackground
 import com.networkedassets.gherkin.runner.gherkin.StepKeyword
 import com.networkedassets.gherkin.runner.gherkin.StepKeyword.*
-import gherkin.ast.Background
 import groovy.lang.Closure
 import org.junit.runner.RunWith
 
@@ -12,7 +12,7 @@ import org.junit.runner.RunWith
 open class FeatureSpecification {
     val stepDefs = mutableMapOf<Pair<StepKeyword, String>, Closure<Any>>()
     lateinit var bindings: ExampleBindings
-    val backgrounds = mutableListOf<Background>()
+    lateinit var gherkinBackground: GherkinBackground
     private var lastType: StepKeyword = GIVEN
 
     fun given(stepText: String, closure: Closure<Any>) {

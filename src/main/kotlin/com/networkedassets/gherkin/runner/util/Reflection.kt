@@ -30,7 +30,7 @@ object Reflection {
             throw NotFoundImplementationException("Feature implementation not found for $featureName")
         }
         val featureSpecification = featureClasses.first().newInstance() as FeatureSpecification
-        featureSpecification.backgrounds.addAll(feature.backgrounds)
+        featureSpecification.gherkinBackground = feature.backgrounds
         return featureSpecification
     }
 
