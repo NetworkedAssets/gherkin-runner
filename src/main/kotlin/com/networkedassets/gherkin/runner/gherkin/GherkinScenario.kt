@@ -3,7 +3,7 @@ package com.networkedassets.gherkin.runner.gherkin
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.io.Serializable
 
-data class GherkinScenario(val name: String,
+data class GherkinScenario(val name: String?,
                            val description: String?,
                            val tags: List<String>,
                            @JsonIgnore val feature: GherkinFeature,

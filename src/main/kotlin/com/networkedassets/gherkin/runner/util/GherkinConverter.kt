@@ -21,7 +21,7 @@ object GherkinConverter {
     private fun converOutlineToManyScenarios(scenario: GherkinScenario) =
             scenario.examples.flatMap { example ->
                 example.bindings.map { binding ->
-                    val gherkinScenario = GherkinScenario(scenario.name.fillPlaceholdersWithValues(binding),
+                    val gherkinScenario = GherkinScenario(scenario.name?.fillPlaceholdersWithValues(binding),
                             scenario.description?.fillPlaceholdersWithValues(binding), example.tags, scenario.feature, scenario, binding)
                     scenario.steps.forEach { step ->
                         val gherkinStep = GherkinStep(step.keyword, step.realKeyword, step.content.fillPlaceholdersWithValues(binding), scenario,
@@ -89,5 +89,15 @@ object GherkinConverter {
     private fun DataTable.to2DArray() = this.rows.map { it.cells.map { it.value }.toTypedArray() }.toTypedArray()
 
     private fun String.fillPlaceholdersWithValues(bindings: Map<String, String>) =
-            bindings.toList().fold(this) { acc, binding -> acc.replace("<${binding.first}>", binding.second) }
+            bindings.toList().fold(this) { acc, binding ->
+                val first = binding.first
+                val matchEntire = Regex("^[#](.*)\$").matchEntire(first)
+                if (matchEntire != null) {
+                    val (realBinding) = matchEntire.destructured
+                    acc.replace("<${realBinding}>", binding.second)
+                } else {
+                    acc.replace("<${first}>", binding.second)
+                }
+            }
+
 }

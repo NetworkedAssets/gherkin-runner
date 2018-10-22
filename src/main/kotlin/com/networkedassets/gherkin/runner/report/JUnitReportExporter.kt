@@ -55,7 +55,7 @@ class JUnitReportExporter : ReportExporter {
                 testcase.addAll(testcases)
             }
 
-    private fun convertScenarioReportToTestcase(featureName: String, scenarioName: String, scenarioReport: ScenarioReport) =
+    private fun convertScenarioReportToTestcase(featureName: String, scenarioName: String?, scenarioReport: ScenarioReport) =
             Testcase().apply {
                 name = scenarioName
                 classname = featureName
