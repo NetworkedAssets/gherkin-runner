@@ -10,11 +10,17 @@ class ProvisioningInternetAccessSpec extends FeatureSpecification {
 
 
 
-    def "KAI service successful provisioning <modem>"() {
+    def "KAI service successful provisioning"() {
 
         given("<modem> is OFF") {
-            println "fsdfsd"
+            data -> println data
 //            println properties
+        }
+        and ("<modem> is removed by \$deviceManager"){
+
+        }
+        and ("account data is prepared in \$sbpDatabase") {
+
         }
 
     }

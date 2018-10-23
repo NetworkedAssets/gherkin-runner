@@ -91,10 +91,16 @@ object GherkinConverter {
     private fun String.fillPlaceholdersWithValues(bindings: Map<String, String>) =
             bindings.toList().fold(this) { acc, binding ->
                 val first = binding.first
-                val matchEntire = Regex("^[#](.*)\$").matchEntire(first)
+                val matchEntire = Regex("[#]?(.[^ ]*)$|[#]?(.*)([ ][<].*)$").matchEntire(first)
                 if (matchEntire != null) {
-                    val (realBinding) = matchEntire.destructured
-                    acc.replace("<${realBinding}>", binding.second)
+                    val (firstGroup, secondGroup) = matchEntire.destructured
+                    val expToReplace: String
+                    if (!firstGroup.isEmpty()) {
+                        expToReplace = firstGroup
+                    } else {
+                        expToReplace = secondGroup
+                    }
+                    acc.replace("<${expToReplace}>", binding.second)
                 } else {
                     acc.replace("<${first}>", binding.second)
                 }

@@ -1,11 +1,11 @@
 # Each feature should have very short description about it's basic goal in the 'Overview' section.
 Feature: Provisioning KAI service
-   Overview:
-   Provisioning of KAI (Kable Internet) service booked by VF customer which allows to access the Internet via a Cable Modem.
-   Cable Modem is then connected to the customer CPE (e.g. Computer).
+  Overview:
+  Provisioning of KAI (Kable Internet) service booked by VF customer which allows to access the Internet via a Cable Modem.
+  Cable Modem is then connected to the customer CPE (e.g. Computer).
 
-  Background: dsa
-    Given Infrastructured
+  Background:
+    Given Infrastructure
     # Infrastructure describes context of use of each SBP system component involved in the provisioning process.
     # Assumption is that Gherkin-Runner at this stage will only verify if each of them is up and running so the test can be executed on it.
     # Each component has to be of type predefined as Java class and have name declared.
@@ -25,28 +25,31 @@ Feature: Provisioning KAI service
   Scenario Outline: KAI service successful provisioning <modem>
     Given <modem> is OFF
     And <modem> is removed by $deviceManager
-    And account data is prepared in $sbpDatabase
-      | $sbpDatabase.ACCOUNT.type              | KUN               |
-      | $sbpDatabase.ACCOUNT.accountNr         | <modem.accountNr> |
-      | $sbpDatabase.ACCOUNT.hsiServiceCode    | S16               |
-      | $sbpDatabase.ACCOUNT.kai.barringStatus | UNBARRED          |
+    And <account> is prepared in $sbpDatabase
+      | $sbpDatabase.accountType             | KUN                 |
+      | $sbpDatabase.accountNr               | <account.accountNr> |
+      | $sbpDatabase.accountHsiServiceCode   | S16                 |
+      | $sbpDatabase.accountKaiBarringStatus | UNBARRED            |
     And self-install attributes are set for <modem> in $sbpDatabase
-      | $sbpDatabase.Q_SI_QUEUE.state     | 0                 |
-      | $sbpDatabase.Q_SI_QUEUE.accountNr | <modem.accountNr> |
-      | $sbpDatabase.Q_SI_QUEUE.operator  | AUTOTEST          |
+      | $sbpDatabase.Q_SI_QUEUE_state     | 0                   |
+      | $sbpDatabase.Q_SI_QUEUE_accountNr | <account.accountNr> |
+      | $sbpDatabase.Q_SI_QUEUE_operator  | AUTOTEST            |
     When <modem> is turned ON
+    And Wait until ON
     And $clientCPE network interface is restarted
     Then status of <modem> in $sbpDatabase indicates that it is provisioned
-      | $sbpDatabase.Q_ACCOUNT_QUEUE.state  | ready |
-      | $sbpDatabase.Q_SI_QUEUE.state       | 1     |
-      | $sbpDatabase.Q_PROV_ACK_QUEUE.state | ready |
+      | $sbpDatabase.Q_ACCOUNT_QUEUE_state  | ready |
+      | $sbpDatabase.Q_SI_QUEUE_state       | 1     |
+      | $sbpDatabase.Q_PROV_ACK_QUEUE_state | ready |
     And $sbpDatabase.Q_ACCOUNT_DETAILS has no errors for provisioned <modem>
-    And <type> reaches google.com
+    And <clientCPE> reaches google.com
 
     # Example is an object which has type of predefined Java class.
     # In scenario it can be referenced by '<>' braces.
     # Each example (each table row) will be executed by Gherkin-Runner as separate test.
     # 'type' and 'description' are restricted keywords in table columns.
     Examples: Correct user accounts, contracts and mac addresses of existing modems
-      | #modem | type | #description          |
-      | modem1 | Modem | Use Case for Homebox3 |
+      | #modem | #account <Account> | #description          |
+      | modem1 | account1           | Use Case for Homebox3 |
+      | modem2 | account2           | Use Case for Homebox2 |
+      | modem3 | account3           | Use Case for Homebox4 |
