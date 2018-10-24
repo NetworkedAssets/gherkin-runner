@@ -1,12 +1,16 @@
 package com.networkedassets.gherkin.runner.util
 
 import com.networkedassets.gherkin.runner.gherkin.*
+import com.networkedassets.gherkin.runner.specification.ExampleBindings
 import gherkin.ast.*
 
 object GherkinConverter {
     fun convertFeature(feature: Feature): GherkinFeature {
+        val envBindings = ExampleBindings(convert2DArrToEnvBindings(convertBackground(feature).getDataTableForStep(0)))
         val gherkinFeature = GherkinFeature(feature.name,
-                feature.tags.map { it.name }, convertBackground(feature))
+                feature.tags.map { it.name },
+                convertBackground(feature),
+                envBindings)
         feature.children
                 .flatMap {
                     val scenario = convertScenario(gherkinFeature, it)
@@ -33,6 +37,7 @@ object GherkinConverter {
             }
 
     private fun convertScenario(feature: GherkinFeature, scenario: ScenarioDefinition): GherkinScenario {
+
         val scenarioTags = when (scenario) {
             is Scenario -> scenario.tags
             is ScenarioOutline -> scenario.tags
@@ -40,6 +45,7 @@ object GherkinConverter {
         }.map { it.name }
         val scenarioTagsMergedWithFeatureTags = listOf(scenarioTags, feature.tags).flatten().distinct()
         val gherkinScenario = GherkinScenario(scenario.name, scenario.description?.trim(), scenarioTagsMergedWithFeatureTags, feature)
+
         scenario.steps.forEach {
             val stepKeyword = convertStepKeyword(it.keyword)
             val realKeyword =
@@ -55,6 +61,14 @@ object GherkinConverter {
             }
         }
         return gherkinScenario
+    }
+
+    private fun convert2DArrToEnvBindings(dataTableForStep: Array<Array<String>>?): Map<String, String> {
+        val converted = mutableMapOf<String, String>()
+        dataTableForStep
+                ?.dropWhile { row -> row[0].contains("#") }
+                ?.map { row -> converted.put(row[0], row[1]) }
+        return converted
     }
 
     private fun convertBackground(feature: Feature): GherkinBackground {
@@ -88,9 +102,22 @@ object GherkinConverter {
 
     private fun DataTable.to2DArray() = this.rows.map { it.cells.map { it.value }.toTypedArray() }.toTypedArray()
 
+
+    /**
+     * Allows 3 use cases for Example's table headers
+     * 1: |#modem |
+     *    | modem1|
+     * 2: |#modem <Modem>|
+     *    | modem1       |
+     * 3: |modem <Modem> |
+     *    | modem1       |
+     * in order to bind variable from Steps use just <modem>
+     * it would work with all 3 use-cases
+     */
     private fun String.fillPlaceholdersWithValues(bindings: Map<String, String>) =
             bindings.toList().fold(this) { acc, binding ->
                 val first = binding.first
+                //implements optional hash sign use-case
                 val matchEntire = Regex("[#]?(.[^ ]*)$|[#]?(.*)([ ][<].*)$").matchEntire(first)
                 if (matchEntire != null) {
                     val (firstGroup, secondGroup) = matchEntire.destructured

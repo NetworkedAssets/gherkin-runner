@@ -31,6 +31,7 @@ object Reflection {
         }
         val featureSpecification = featureClasses.first().newInstance() as FeatureSpecification
         featureSpecification.gherkinBackground = feature.backgrounds
+        featureSpecification.envBindings = feature.envBindings
         return featureSpecification
     }
 
