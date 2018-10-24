@@ -1,7 +1,7 @@
 
 package com.networkedassets.gherkin.runner
 
-import com.networkedassets.gherkin.runner.annotation.BeforeFeature
+
 import com.networkedassets.gherkin.runner.annotation.Feature
 import com.networkedassets.gherkin.runner.specification.FeatureSpecification
 
@@ -9,17 +9,15 @@ import com.networkedassets.gherkin.runner.specification.FeatureSpecification
 class ProvisioningInternetAccessSpec extends FeatureSpecification {
 
 
-    @BeforeFeature
-    def before() {
 
-    }
 
     def "KAI service successful provisioning <modem>"() {
 
         given("<modem> is OFF") {
-            println envBindings.bindings
+            println bindings.bindings
         }
         and ("<modem> is removed by \$deviceManager"){
+//            getDeviceManager(envBindings.get("Device Manager")).remove(bindings.get("modem"))
 
         }
         and ("account data is prepared in \$sbpDatabase") {

@@ -52,4 +52,7 @@ Feature: Provisioning KAI service
       | #modem | #account <Account> | #description          |
       | modem1 | account1           | Use Case for Homebox3 |
       | modem2 | account2           | Use Case for Homebox2 |
-      | modem3 | account3           | Use Case for Homebox4 |
+      | modem3 | account2           | Use Case for Homebox2 |
+      | modem4 | account3           | Use Case for Homebox4 |
+      | modem5 | account3           | Use Case for Homebox4 |
+      | modem6 | account3           | Use Case for Homebox4 |

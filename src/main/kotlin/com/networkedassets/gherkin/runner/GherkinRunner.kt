@@ -80,19 +80,20 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
                 featureSuiteDescription.addChild(beforeFeature)
                 feature.scenarios.forEach { scenario ->
                     val scenarioName = scenario.name?.replaceDotsWithIntelliJFriendlyDots()
-                    if (scenarioName != "") {
-                        val scenarioSuiteDescription = Description.createSuiteDescription(scenarioName)
-                        val beforeScenario = Description.createTestDescription(scenarioName, "> Before scenario")
-                        scenarioSuiteDescription.addChild(beforeScenario)
-                        scenario.steps.forEach { step ->
-                            val stepContent = step.fullContent.replaceDotsWithIntelliJFriendlyDots()
-                            val stepDescription = Description.createTestDescription(scenarioName, stepContent)
-                            scenarioSuiteDescription.addChild(stepDescription)
-                        }
-                        val afterScenario = Description.createTestDescription(scenarioName, "> After scenario")
-                        scenarioSuiteDescription.addChild(afterScenario)
-                        featureSuiteDescription.addChild(scenarioSuiteDescription)
+                    val realScenarioName = if (scenarioName == "") "Infrastructure" else scenarioName
+
+                    val scenarioSuiteDescription = Description.createSuiteDescription(realScenarioName)
+                    val beforeScenario = Description.createTestDescription(realScenarioName, "> Before scenario")
+                    scenarioSuiteDescription.addChild(beforeScenario)
+                    scenario.steps.forEach { step ->
+                        val stepContent = step.fullContent.replaceDotsWithIntelliJFriendlyDots()
+                        val stepDescription = Description.createTestDescription(realScenarioName, stepContent)
+                        scenarioSuiteDescription.addChild(stepDescription)
                     }
+                    val afterScenario = Description.createTestDescription(realScenarioName, "> After scenario")
+                    scenarioSuiteDescription.addChild(afterScenario)
+                    featureSuiteDescription.addChild(scenarioSuiteDescription)
+
                 }
                 val afterFeature = Description.createTestDescription(featureName, "> After feature")
                 featureSuiteDescription.addChild(afterFeature)
