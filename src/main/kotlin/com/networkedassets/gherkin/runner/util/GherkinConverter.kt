@@ -121,12 +121,7 @@ object GherkinConverter {
                 val matchEntire = Regex("[#]?(.[^ ]*)$|[#]?(.*)([ ][<].*)$").matchEntire(first)
                 if (matchEntire != null) {
                     val (firstGroup, secondGroup) = matchEntire.destructured
-                    val expToReplace: String
-                    if (!firstGroup.isEmpty()) {
-                        expToReplace = firstGroup
-                    } else {
-                        expToReplace = secondGroup
-                    }
+                    val expToReplace = if (!firstGroup.isEmpty()) firstGroup else secondGroup
                     acc.replace("<${expToReplace}>", binding.second)
                 } else {
                     acc.replace("<${first}>", binding.second)
