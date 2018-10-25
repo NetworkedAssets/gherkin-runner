@@ -6,18 +6,20 @@ import gherkin.ast.*
 
 object GherkinConverter {
     fun convertFeature(feature: Feature): GherkinFeature {
-        val envBindings = ExampleBindings(convert2DArrToEnvBindings(convertBackground(feature).getDataTableForStep(0)))
+        val convertedBackground = convertBackground(feature)
+        val envBindings = ExampleBindings(convert2DArrToEnvBindings(convertedBackground.getDataTableForStep(0)))
         val gherkinFeature = GherkinFeature(feature.name,
                 feature.tags.map { it.name },
-                convertBackground(feature),
+                convertedBackground,
                 envBindings)
         feature.children
+                .filter { it -> it.keyword != "Background" }
                 .flatMap {
                     val scenario = convertScenario(gherkinFeature, it)
                     if (scenario.isOutline) converOutlineToManyScenarios(scenario)
                     else listOf(scenario)
                 }.forEach({
-                    gherkinFeature.addScenario(it)
+                        gherkinFeature.addScenario(it)
                 })
         return gherkinFeature
     }
@@ -37,7 +39,6 @@ object GherkinConverter {
             }
 
     private fun convertScenario(feature: GherkinFeature, scenario: ScenarioDefinition): GherkinScenario {
-
         val scenarioTags = when (scenario) {
             is Scenario -> scenario.tags
             is ScenarioOutline -> scenario.tags
@@ -63,17 +64,14 @@ object GherkinConverter {
         return gherkinScenario
     }
 
-    private fun convert2DArrToEnvBindings(dataTableForStep: Array<Array<String>>?): Map<String, String> {
-        val converted = mutableMapOf<String, String>()
-        dataTableForStep
+    private fun convert2DArrToEnvBindings(dataTableForStep: Array<Array<String>>?): Map<String, String>? {
+        return dataTableForStep
                 ?.dropWhile { row -> row[0].contains("#") }
-                ?.map { row -> converted.put(row[0], row[1]) }
-        return converted
+                ?.associate { row -> row[0] to row[1] }
     }
 
     private fun convertBackground(feature: Feature): GherkinBackground {
-        val filteredBackgr = feature.children.filterIsInstance<Background>()
-        return GherkinBackground(filteredBackgr)
+        return GherkinBackground(feature.children.filterIsInstance<Background>())
     }
 
     private fun convertExamples(examples: Examples,

@@ -80,17 +80,15 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
                 featureSuiteDescription.addChild(beforeFeature)
                 feature.scenarios.forEach { scenario ->
                     val scenarioName = scenario.name?.replaceDotsWithIntelliJFriendlyDots()
-                    val realScenarioName = if (scenarioName == "") "Infrastructure" else scenarioName
-
-                    val scenarioSuiteDescription = Description.createSuiteDescription(realScenarioName)
-                    val beforeScenario = Description.createTestDescription(realScenarioName, "> Before scenario")
+                    val scenarioSuiteDescription = Description.createSuiteDescription(scenarioName)
+                    val beforeScenario = Description.createTestDescription(scenarioName, "> Before scenario")
                     scenarioSuiteDescription.addChild(beforeScenario)
                     scenario.steps.forEach { step ->
                         val stepContent = step.fullContent.replaceDotsWithIntelliJFriendlyDots()
-                        val stepDescription = Description.createTestDescription(realScenarioName, stepContent)
+                        val stepDescription = Description.createTestDescription(scenarioName, stepContent)
                         scenarioSuiteDescription.addChild(stepDescription)
                     }
-                    val afterScenario = Description.createTestDescription(realScenarioName, "> After scenario")
+                    val afterScenario = Description.createTestDescription(scenarioName, "> After scenario")
                     scenarioSuiteDescription.addChild(afterScenario)
                     featureSuiteDescription.addChild(scenarioSuiteDescription)
 
