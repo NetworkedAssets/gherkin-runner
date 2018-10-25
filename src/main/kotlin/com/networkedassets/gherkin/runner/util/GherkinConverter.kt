@@ -1,34 +1,33 @@
 package com.networkedassets.gherkin.runner.util
 
-import com.networkedassets.gherkin.runner.gherkin.GherkinExamples
-import com.networkedassets.gherkin.runner.gherkin.GherkinFeature
-import com.networkedassets.gherkin.runner.gherkin.GherkinScenario
-import com.networkedassets.gherkin.runner.gherkin.GherkinStep
-import com.networkedassets.gherkin.runner.gherkin.StepKeyword
-import gherkin.ast.DataTable
-import gherkin.ast.Examples
-import gherkin.ast.Feature
-import gherkin.ast.Scenario
-import gherkin.ast.ScenarioDefinition
-import gherkin.ast.ScenarioOutline
-import gherkin.ast.Step
+import com.networkedassets.gherkin.runner.gherkin.*
+import com.networkedassets.gherkin.runner.specification.ExampleBindings
+import gherkin.ast.*
 
 object GherkinConverter {
     fun convertFeature(feature: Feature): GherkinFeature {
-        val gherkinFeature = GherkinFeature(feature.name, feature.tags.map { it.name })
+        val convertedBackground = convertBackground(feature)
+        val envBindings = ExampleBindings(convert2DArrToEnvBindings(convertedBackground.getDataTableForStep(0)))
+        val gherkinFeature = GherkinFeature(feature.name,
+                feature.tags.map { it.name },
+                convertedBackground,
+                envBindings)
         feature.children
+                .filter { it -> it.keyword != "Background" }
                 .flatMap {
                     val scenario = convertScenario(gherkinFeature, it)
                     if (scenario.isOutline) converOutlineToManyScenarios(scenario)
                     else listOf(scenario)
-                }.forEach({ gherkinFeature.addScenario(it) })
+                }.forEach({
+                        gherkinFeature.addScenario(it)
+                })
         return gherkinFeature
     }
 
     private fun converOutlineToManyScenarios(scenario: GherkinScenario) =
             scenario.examples.flatMap { example ->
                 example.bindings.map { binding ->
-                    val gherkinScenario = GherkinScenario(scenario.name.fillPlaceholdersWithValues(binding),
+                    val gherkinScenario = GherkinScenario(scenario.name?.fillPlaceholdersWithValues(binding),
                             scenario.description?.fillPlaceholdersWithValues(binding), example.tags, scenario.feature, scenario, binding)
                     scenario.steps.forEach { step ->
                         val gherkinStep = GherkinStep(step.keyword, step.realKeyword, step.content.fillPlaceholdersWithValues(binding), scenario,
@@ -47,6 +46,7 @@ object GherkinConverter {
         }.map { it.name }
         val scenarioTagsMergedWithFeatureTags = listOf(scenarioTags, feature.tags).flatten().distinct()
         val gherkinScenario = GherkinScenario(scenario.name, scenario.description?.trim(), scenarioTagsMergedWithFeatureTags, feature)
+
         scenario.steps.forEach {
             val stepKeyword = convertStepKeyword(it.keyword)
             val realKeyword =
@@ -62,6 +62,16 @@ object GherkinConverter {
             }
         }
         return gherkinScenario
+    }
+
+    private fun convert2DArrToEnvBindings(dataTableForStep: Array<Array<String>>?): Map<String, String>? {
+        return dataTableForStep
+                ?.dropWhile { row -> row[0].contains("#") }
+                ?.associate { row -> row[0] to row[1] }
+    }
+
+    private fun convertBackground(feature: Feature): GherkinBackground {
+        return GherkinBackground(feature.children.filterIsInstance<Background>())
     }
 
     private fun convertExamples(examples: Examples,
@@ -90,6 +100,30 @@ object GherkinConverter {
 
     private fun DataTable.to2DArray() = this.rows.map { it.cells.map { it.value }.toTypedArray() }.toTypedArray()
 
+
+    /**
+     * Allows 3 use cases for Example's table headers
+     * 1: |#modem |
+     *    | modem1|
+     * 2: |#modem <Modem>|
+     *    | modem1       |
+     * 3: |modem <Modem> |
+     *    | modem1       |
+     * in order to bind variable from Steps use just <modem>
+     * it would work with all 3 use-cases
+     */
     private fun String.fillPlaceholdersWithValues(bindings: Map<String, String>) =
-            bindings.toList().fold(this) { acc, binding -> acc.replace("<${binding.first}>", binding.second) }
+            bindings.toList().fold(this) { acc, binding ->
+                val first = binding.first
+                //implements optional hash sign use-case
+                val matchEntire = Regex("[#]?(.[^ ]*)$|[#]?(.*)([ ][<].*)$").matchEntire(first)
+                if (matchEntire != null) {
+                    val (firstGroup, secondGroup) = matchEntire.destructured
+                    val expToReplace = if (!firstGroup.isEmpty()) firstGroup else secondGroup
+                    acc.replace("<${expToReplace}>", binding.second)
+                } else {
+                    acc.replace("<${first}>", binding.second)
+                }
+            }
+
 }

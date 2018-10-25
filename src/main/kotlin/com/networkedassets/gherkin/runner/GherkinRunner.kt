@@ -1,12 +1,7 @@
 package com.networkedassets.gherkin.runner
 
 import com.networkedassets.gherkin.runner.gherkin.GherkinFeature
-import com.networkedassets.gherkin.runner.report.ElasticsearchReportExporter
-import com.networkedassets.gherkin.runner.report.HPQCReportExporter
-import com.networkedassets.gherkin.runner.report.HTMLReportExporter
-import com.networkedassets.gherkin.runner.report.JSONReportExporter
-import com.networkedassets.gherkin.runner.report.JUnitReportExporter
-import com.networkedassets.gherkin.runner.report.ReportExporter
+import com.networkedassets.gherkin.runner.report.*
 import com.networkedassets.gherkin.runner.report.data.Report
 import com.networkedassets.gherkin.runner.runners.FeatureRunner
 import com.networkedassets.gherkin.runner.util.GherkinLoader
@@ -64,7 +59,7 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
 
     override fun filter(filter: Filter) {
         val filterDescription = filter.describe()
-        if(filterDescription.startsWith("Method ")) {
+        if (filterDescription.startsWith("Method ")) {
             scenarioFilter = filterDescription.removePrefix("Method ").split("(")[0]
         }
     }
@@ -76,7 +71,7 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
     }
 
     private fun initializeDescription() {
-        if(!::description.isInitialized) {
+        if (!::description.isInitialized) {
             description = Description.createSuiteDescription("GherkinRunner")
             features.forEach { feature ->
                 val featureName = feature.name.replaceDotsWithIntelliJFriendlyDots()
@@ -84,7 +79,7 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
                 val beforeFeature = Description.createTestDescription(featureName, "> Before feature")
                 featureSuiteDescription.addChild(beforeFeature)
                 feature.scenarios.forEach { scenario ->
-                    val scenarioName = scenario.name.replaceDotsWithIntelliJFriendlyDots()
+                    val scenarioName = scenario.name?.replaceDotsWithIntelliJFriendlyDots()
                     val scenarioSuiteDescription = Description.createSuiteDescription(scenarioName)
                     val beforeScenario = Description.createTestDescription(scenarioName, "> Before scenario")
                     scenarioSuiteDescription.addChild(beforeScenario)
@@ -96,6 +91,7 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
                     val afterScenario = Description.createTestDescription(scenarioName, "> After scenario")
                     scenarioSuiteDescription.addChild(afterScenario)
                     featureSuiteDescription.addChild(scenarioSuiteDescription)
+
                 }
                 val afterFeature = Description.createTestDescription(featureName, "> After feature")
                 featureSuiteDescription.addChild(afterFeature)
@@ -105,7 +101,7 @@ class GherkinRunner(private val clazz: Class<*>) : Runner(), Filterable {
     }
 
     private fun initializeFeatures() {
-        if(!::features.isInitialized) features = GherkinLoader.loadFeatures(featureFilter = featureFilter, scenarioFilter = scenarioFilter)
+        if (!::features.isInitialized) features = GherkinLoader.loadFeatures(featureFilter = featureFilter, scenarioFilter = scenarioFilter)
     }
 
     private fun String.replaceDotsWithIntelliJFriendlyDots() = this.replace('.', '․')

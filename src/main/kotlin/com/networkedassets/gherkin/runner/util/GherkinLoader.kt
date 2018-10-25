@@ -11,7 +11,6 @@ import org.reflections.Reflections
 import org.reflections.scanners.ResourcesScanner
 import java.util.regex.Pattern
 import javax.script.ScriptEngineManager
-import javax.script.ScriptException
 
 
 object GherkinLoader {
@@ -23,7 +22,9 @@ object GherkinLoader {
         log.info { "Loading feature specifications from package: '$packagePrefix' with feature filter: '$featureFilter' and scenario filter: '$scenarioFilter'" }
         val reflections = Reflections(packagePrefix, ResourcesScanner())
         val fileNames = reflections.getResources(Pattern.compile(".*\\.feature"))
-        return fileNames.map({ readFeatureFromFile(it) }).filter(featureFilter, scenarioFilter)
+        return fileNames.map({
+            readFeatureFromFile(it)
+        }).filter(featureFilter, scenarioFilter)
     }
 
     private fun readFeatureFromFile(path: String): GherkinFeature {
@@ -37,9 +38,11 @@ object GherkinLoader {
 
     private fun List<GherkinFeature>.filter(featureFilter: String? = null, scenarioFilter: String? = null): List<GherkinFeature> {
         val tagsExpression = System.getProperty("gherkinTags")
-        if(!tagsExpression.isNullOrBlank()) log.info { "Filtering features and scenarios using expression: '$tagsExpression'" }
+        if (!tagsExpression.isNullOrBlank()) log.info { "Filtering features and scenarios using expression: '$tagsExpression'" }
         return this.filter { filterFeature(it, featureFilter) }.map {
             val gherkinFeature = it.copy()
+            gherkinFeature.backgrounds = it.backgrounds
+            gherkinFeature.envBindings = it.envBindings
             gherkinFeature.scenarios.addAll(it.scenarios.filter { filterScenario(it, scenarioFilter, tagsExpression) })
             gherkinFeature
         }.filter { it.scenarios.size > 0 }

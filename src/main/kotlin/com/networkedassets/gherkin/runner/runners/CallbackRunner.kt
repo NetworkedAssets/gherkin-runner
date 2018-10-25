@@ -1,16 +1,16 @@
 package com.networkedassets.gherkin.runner.runners
 
-import mu.KotlinLogging
-import org.junit.AssumptionViolatedException
-import org.junit.internal.runners.model.EachTestNotifier
-import org.junit.runner.Description
-import org.junit.runner.notification.RunNotifier
 import com.networkedassets.gherkin.runner.exception.MultipleImplementationsException
 import com.networkedassets.gherkin.runner.exception.NotFoundImplementationException
 import com.networkedassets.gherkin.runner.report.data.CallbackType
 import com.networkedassets.gherkin.runner.report.data.ReportEntry
 import com.networkedassets.gherkin.runner.specification.FeatureSpecification
 import com.networkedassets.gherkin.runner.util.Reflection
+import mu.KotlinLogging
+import org.junit.AssumptionViolatedException
+import org.junit.internal.runners.model.EachTestNotifier
+import org.junit.runner.Description
+import org.junit.runner.notification.RunNotifier
 import java.lang.reflect.Method
 
 class CallbackRunner(private val callbackDescription: Description,
