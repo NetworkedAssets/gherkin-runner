@@ -27,6 +27,7 @@ class FeatureRunner(private val implementationsPackage: String,
         featureReport.start()
         try {
             val featureSpecification = Reflection.getFeatureSpecification(implementationsPackage, feature)
+            featureSpecification.feature = feature
             runImplemented(featureSpecification)
         } catch (e: NotFoundImplementationException) {
             runNotImplemented()
