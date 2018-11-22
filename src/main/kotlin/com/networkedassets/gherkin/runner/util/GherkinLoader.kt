@@ -42,6 +42,7 @@ object GherkinLoader {
         return this.filter { filterFeature(it, featureFilter) }.map {
             val gherkinFeature = it.copy()
             gherkinFeature.scenarios.addAll(it.scenarios.filter { filterScenario(it, scenarioFilter, tagsExpression) })
+            gherkinFeature.backgrounds.addAll(it.backgrounds)
             gherkinFeature
         }.filter { it.scenarios.size > 0 }
     }
