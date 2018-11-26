@@ -6,7 +6,7 @@ import java.io.Serializable
 data class GherkinStep(val keyword: StepKeyword,
                        val realKeyword: StepKeyword,
                        val content: String,
-                       @JsonIgnore val scenario: GherkinScenario,
+                       @JsonIgnore val scenario: GherkinScenarioBase,
                        @JsonIgnore val data: Array<Array<String>>? = null,
                        val outlinedContent: String? = null) : Serializable {
     val featureName

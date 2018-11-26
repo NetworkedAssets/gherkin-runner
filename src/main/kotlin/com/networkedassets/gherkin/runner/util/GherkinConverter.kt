@@ -1,10 +1,13 @@
 package com.networkedassets.gherkin.runner.util
 
+import com.networkedassets.gherkin.runner.gherkin.GherkinBackground
 import com.networkedassets.gherkin.runner.gherkin.GherkinExamples
 import com.networkedassets.gherkin.runner.gherkin.GherkinFeature
 import com.networkedassets.gherkin.runner.gherkin.GherkinScenario
+import com.networkedassets.gherkin.runner.gherkin.GherkinScenarioBase
 import com.networkedassets.gherkin.runner.gherkin.GherkinStep
 import com.networkedassets.gherkin.runner.gherkin.StepKeyword
+import gherkin.ast.Background
 import gherkin.ast.DataTable
 import gherkin.ast.Examples
 import gherkin.ast.Feature
@@ -17,11 +20,22 @@ object GherkinConverter {
     fun convertFeature(feature: Feature): GherkinFeature {
         val gherkinFeature = GherkinFeature(feature.name, feature.tags.map { it.name })
         feature.children
+                .filter { it -> it is Scenario || it is ScenarioOutline }
                 .flatMap {
                     val scenario = convertScenario(gherkinFeature, it)
                     if (scenario.isOutline) converOutlineToManyScenarios(scenario)
                     else listOf(scenario)
-                }.forEach({ gherkinFeature.addScenario(it) })
+                }.forEach {
+                    gherkinFeature.addScenario(it)
+                }
+        feature.children
+                .filterIsInstance<Background>()
+                .map {
+                    convertBackground(gherkinFeature, it)
+                }.forEach {
+                    gherkinFeature.addBackground(it)
+                }
+
         return gherkinFeature
     }
 
@@ -64,6 +78,20 @@ object GherkinConverter {
         return gherkinScenario
     }
 
+    private fun convertBackground(feature: GherkinFeature, background: Background): GherkinBackground {
+        val gherkinBackground = GherkinBackground(background.name, background.description?.trim(), feature)
+        background.steps.forEach {
+            val stepKeyword = convertStepKeyword(it.keyword)
+            val realKeyword =
+                    if (stepKeyword == StepKeyword.AND)
+                        if (background.steps.isEmpty()) StepKeyword.GIVEN else gherkinBackground.steps.last().realKeyword
+                    else stepKeyword
+            val gherkinStep = convertStep(gherkinBackground, stepKeyword, realKeyword, it)
+            gherkinBackground.addStep(gherkinStep)
+        }
+        return gherkinBackground
+    }
+
     private fun convertExamples(examples: Examples,
                                 gherkinScenario: GherkinScenario): GherkinExamples {
         val examplesTags = examples.tags.map { it.name }
@@ -78,7 +106,7 @@ object GherkinConverter {
         return gherkinExamples
     }
 
-    private fun convertStep(scenario: GherkinScenario, stepKeyword: StepKeyword, realKeyword: StepKeyword, step: Step): GherkinStep {
+    private fun convertStep(scenario: GherkinScenarioBase, stepKeyword: StepKeyword, realKeyword: StepKeyword, step: Step): GherkinStep {
         val argument = step.argument
         val data = argument as? DataTable
         return GherkinStep(stepKeyword, realKeyword, step.text, scenario, data?.to2DArray())

@@ -1,9 +1,13 @@
 package com.networkedassets.gherkin.runner.specification
 
 import com.networkedassets.gherkin.runner.GherkinRunner
-import groovy.lang.Closure
+import com.networkedassets.gherkin.runner.gherkin.GherkinFeature
 import com.networkedassets.gherkin.runner.gherkin.StepKeyword
-import com.networkedassets.gherkin.runner.gherkin.StepKeyword.*
+import com.networkedassets.gherkin.runner.gherkin.StepKeyword.AND
+import com.networkedassets.gherkin.runner.gherkin.StepKeyword.GIVEN
+import com.networkedassets.gherkin.runner.gherkin.StepKeyword.THEN
+import com.networkedassets.gherkin.runner.gherkin.StepKeyword.WHEN
+import groovy.lang.Closure
 import org.junit.runner.RunWith
 
 
@@ -11,7 +15,7 @@ import org.junit.runner.RunWith
 open class FeatureSpecification {
     val stepDefs = mutableMapOf<Pair<StepKeyword, String>, Closure<Any>>()
     lateinit var bindings: ExampleBindings
-
+    lateinit var feature: GherkinFeature
     private var lastType: StepKeyword = GIVEN
 
     fun given(stepText: String, closure: Closure<Any>) {
