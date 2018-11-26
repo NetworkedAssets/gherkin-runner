@@ -118,18 +118,6 @@ object GherkinConverter {
 
     private fun DataTable.to2DArray() = this.rows.map { it.cells.map { it.value }.toTypedArray() }.toTypedArray()
 
-    //TODO: to be discussed if it is still needed?
     private fun String.fillPlaceholdersWithValues(bindings: Map<String, String>) =
-            bindings.toList().fold(this) { acc, binding ->
-                val first = binding.first
-                val matchEntire = Regex("[#]?(.[^ ]*)$|[#]?(.*)([ ][<].*)$").matchEntire(first)
-                if (matchEntire != null) {
-                    val (firstGroup, secondGroup) = matchEntire.destructured
-                    val expToReplace = if (!firstGroup.isEmpty()) firstGroup else secondGroup
-                    acc.replace("<$expToReplace>", binding.second)
-                } else {
-                    acc.replace("<$first>", binding.second)
-                }
-            }
-
+            bindings.toList().fold(this) { acc, binding -> acc.replace("<${binding.first}>", binding.second) }
 }
