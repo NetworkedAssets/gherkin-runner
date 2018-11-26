@@ -5,6 +5,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils
 import com.networkedassets.gherkin.runner.gherkin.GherkinStep
 
 class StepReport(val step: GherkinStep, parent: ReportEntry) : ReportEntry(parent) {
+    var metadata: Any? = null
+
     @JsonIgnore
     var thrownException: Throwable? = null
 

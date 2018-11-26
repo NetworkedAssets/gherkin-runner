@@ -5,6 +5,7 @@ import com.networkedassets.gherkin.runner.gherkin.GherkinScenario
 
 class FeatureReport(val feature: GherkinFeature, parent: ReportEntry) : ReportEntry(parent) {
     val scenarioReports: MutableList<ScenarioReport> = mutableListOf()
+    var metadata: Any? = null
 
     override var state: ReportState? = null
         get() =

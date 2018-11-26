@@ -5,6 +5,7 @@ import com.networkedassets.gherkin.runner.gherkin.GherkinStep
 
 class ScenarioReport(val scenario: GherkinScenario, parent: ReportEntry) : ReportEntry(parent) {
     val stepReports: MutableList<StepReport> = mutableListOf()
+    var metadata: Any? = null
 
     override var state: ReportState? = null
         get() =
