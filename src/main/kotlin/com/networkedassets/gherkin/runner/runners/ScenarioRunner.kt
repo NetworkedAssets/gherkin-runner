@@ -29,7 +29,9 @@ class ScenarioRunner(private val scenario: GherkinScenario,
         try {
             val scenarioMethod = Reflection.getMethodForScenario(featureSpecification, scenario)
             featureSpecification.bindings = ExampleBindings(scenario.bindings)
+            featureSpecification.metadataListeners.scenarioMetadataListener = { metadata -> scenarioReport.metadata = metadata }
             runImplemented(featureSpecification, scenarioMethod)
+            featureSpecification.metadataListeners.scenarioMetadataListener = null
         } catch (e: NotFoundImplementationException) {
             runNotImplemented()
         } catch (e: MultipleImplementationsException) {
@@ -54,8 +56,7 @@ class ScenarioRunner(private val scenario: GherkinScenario,
         beforeScenarioRunner().run(featureSpecification)
         featureSpecification.clearStepDefs()
         scenarioMethod.invoke(featureSpecification)
-        val stepDefs = featureSpecification.stepDefs
-        stepRunners().forEach { it.run(stepDefs) }
+        stepRunners().forEach { it.run(featureSpecification) }
         afterScenarioRunner().run(featureSpecification)
     }
 

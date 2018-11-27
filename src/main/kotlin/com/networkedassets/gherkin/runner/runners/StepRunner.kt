@@ -1,19 +1,19 @@
 package com.networkedassets.gherkin.runner.runners
 
+import com.networkedassets.gherkin.runner.data.RunType
+import com.networkedassets.gherkin.runner.exception.MultipleImplementationsException
+import com.networkedassets.gherkin.runner.exception.NotFoundImplementationException
+import com.networkedassets.gherkin.runner.gherkin.GherkinStep
+import com.networkedassets.gherkin.runner.report.data.ReportState
+import com.networkedassets.gherkin.runner.report.data.ScenarioReport
+import com.networkedassets.gherkin.runner.specification.FeatureSpecification
+import com.networkedassets.gherkin.runner.util.Reflection
 import groovy.lang.Closure
 import mu.KotlinLogging
 import org.junit.AssumptionViolatedException
 import org.junit.internal.runners.model.EachTestNotifier
 import org.junit.runner.Description
 import org.junit.runner.notification.RunNotifier
-import com.networkedassets.gherkin.runner.data.RunType
-import com.networkedassets.gherkin.runner.exception.MultipleImplementationsException
-import com.networkedassets.gherkin.runner.exception.NotFoundImplementationException
-import com.networkedassets.gherkin.runner.gherkin.GherkinStep
-import com.networkedassets.gherkin.runner.gherkin.StepKeyword
-import com.networkedassets.gherkin.runner.report.data.ReportState
-import com.networkedassets.gherkin.runner.report.data.ScenarioReport
-import com.networkedassets.gherkin.runner.util.Reflection
 
 class StepRunner(private val step: GherkinStep,
                  private val stepDescription: Description,
@@ -25,15 +25,17 @@ class StepRunner(private val step: GherkinStep,
 
     val log = KotlinLogging.logger { }
 
-    fun run(stepDefs: Map<Pair<StepKeyword, String>, Closure<Any>>) {
+    fun run(featureSpecification: FeatureSpecification) {
         log.info("^^ ${step.fullContent}")
         stepReport.start()
         try {
-            val stepDef = Reflection.getClosureForStep(stepDefs, step)
+            val stepDef = Reflection.getClosureForStep(featureSpecification.stepDefs, step)
             if(anyStepBeforeHasProblem()) {
                 runSkipped()
             } else {
+                featureSpecification.metadataListeners.stepMetadataListener = { metadata -> stepReport.metadata = metadata }
                 runImplemented(stepDef)
+                featureSpecification.metadataListeners.stepMetadataListener = null
             }
         } catch (e: NotFoundImplementationException) {
             runNotImplemented()

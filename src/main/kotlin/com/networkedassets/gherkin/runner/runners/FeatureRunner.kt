@@ -28,6 +28,7 @@ class FeatureRunner(private val implementationsPackage: String,
         try {
             val featureSpecification = Reflection.getFeatureSpecification(implementationsPackage, feature)
             featureSpecification.feature = feature
+            featureSpecification.metadataListeners.featureMetadataListener = { metadata -> featureReport.metadata = metadata }
             runImplemented(featureSpecification)
         } catch (e: NotFoundImplementationException) {
             runNotImplemented()
