@@ -1,6 +1,7 @@
 package com.networkedassets.gherkin.runner.specification
 
 import com.networkedassets.gherkin.runner.GherkinRunner
+import com.networkedassets.gherkin.runner.exception.InvalidMetadataManipulationException
 import com.networkedassets.gherkin.runner.gherkin.GherkinFeature
 import com.networkedassets.gherkin.runner.gherkin.StepKeyword
 import com.networkedassets.gherkin.runner.gherkin.StepKeyword.AND
@@ -61,10 +62,10 @@ abstract class FeatureSpecification {
     }
 
     private fun setMetadata(listener: ((Any) -> Unit)?, metadata: Any, errorMessage: String) {
-        if(listener != null) {
+        if (listener != null) {
             listener(metadata)
         } else {
-            throw RuntimeException(errorMessage)
+            throw InvalidMetadataManipulationException(errorMessage)
         }
     }
 }
