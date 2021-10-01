@@ -1,8 +1,5 @@
 package com.networkedassets.gherkin.runner.runners
 
-import mu.KotlinLogging
-import org.junit.runner.Description
-import org.junit.runner.notification.RunNotifier
 import com.networkedassets.gherkin.runner.data.RunType
 import com.networkedassets.gherkin.runner.exception.MultipleImplementationsException
 import com.networkedassets.gherkin.runner.exception.NotFoundImplementationException
@@ -12,6 +9,9 @@ import com.networkedassets.gherkin.runner.report.data.FeatureReport
 import com.networkedassets.gherkin.runner.specification.ExampleBindings
 import com.networkedassets.gherkin.runner.specification.FeatureSpecification
 import com.networkedassets.gherkin.runner.util.Reflection
+import mu.KotlinLogging
+import org.junit.runner.Description
+import org.junit.runner.notification.RunNotifier
 import java.lang.reflect.Method
 
 class ScenarioRunner(private val scenario: GherkinScenario,
@@ -75,6 +75,9 @@ class ScenarioRunner(private val scenario: GherkinScenario,
     private fun stepRunners() = stepsJoinedWithDescriptions().map { (step, description) ->
         StepRunner(step, description, scenarioReport, notifier)
     }
-    private fun beforeScenarioRunner() = CallbackRunner(scenarioDescription.children.first(), CallbackType.BEFORE_SCENARIO, scenarioReport, notifier)
-    private fun afterScenarioRunner() = CallbackRunner(scenarioDescription.children.last(), CallbackType.AFTER_SCENARIO, scenarioReport, notifier)
+    private fun beforeScenarioRunner() =
+        ScenarioCallbackRunner(CallbackType.BEFORE_SCENARIO, scenario, scenarioDescription.children.first(), scenarioReport, notifier)
+
+    private fun afterScenarioRunner() =
+        ScenarioCallbackRunner(CallbackType.AFTER_SCENARIO, scenario, scenarioDescription.children.last(), scenarioReport, notifier)
 }
