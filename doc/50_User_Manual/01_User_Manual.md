@@ -108,6 +108,18 @@ defined by annotation name:
 * `@BeforeScenario`
 * `@AfterScenario`
 
+What is more, scenario callbacks can be also supplemented by criteria, making them run only under specific circumstances. By default, if there are no
+criteria provided, callback will run for every scenario. Multiple criteria can be combined for one callback. In order to execute the callback, all
+criteria must be fulfilled. Currently, there are available criteria such as:
+
+* `CriteriaType.ALL_SCENARIOS`
+* `CriteriaType.NAME_CONTAINS`
+* `CriteriaType.NAME_NOT_CONTAINS`
+
+For `@BeforeScenario`, the list above presents also the priority of callback execution. E.g., if there are two callbacks, one
+with `CriteriaType.ALL_SCENARIOS` criteria, and the other one with `CriteriaType.NAME_CONTAINS` criteria, the former will execute first. On the other
+hand, execution order for `@AfterScenario` will be inverted. 
+
 ### Example
 
 ```groovy
@@ -116,6 +128,23 @@ class ManipulatingListElementsSpec extends FeatureSpecification {
     @BeforeScenario
     def before() {
         // this method will be rune before every scenario
+    }
+    
+    // ... scenario definitions
+}
+```
+
+### Example of criteria usage
+
+```groovy
+@Feature("Manipulating numbers")
+class ManipulatingNumbersSpec extends FeatureSpecification {
+    @BeforeScenario(criteria = [
+            @Criteria(type = CriteriaType.NAME_CONTAINS, value = "addition"),
+            @Criteria(type = CriteriaType.NAME_NOT_CONTAINS, value = "fraction")
+    ])
+    def before() {
+        // this method will be executed only, if the scenario name contains a word 'addition', and a word 'fraction' is not present
     }
     
     // ... scenario definitions
