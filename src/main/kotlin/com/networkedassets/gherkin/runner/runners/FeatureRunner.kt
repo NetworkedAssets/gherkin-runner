@@ -62,6 +62,6 @@ class FeatureRunner(private val implementationsPackage: String,
         ScenarioRunner(scenario, description, featureReport, notifier)
     }
 
-    private fun beforeFeatureRunner() = CallbackRunner(featureDescription.children.first(), CallbackType.BEFORE_FEATURE, featureReport, notifier)
-    private fun afterFeatureRunner() = CallbackRunner(featureDescription.children.last(), CallbackType.AFTER_FEATURE, featureReport, notifier)
+    private fun beforeFeatureRunner() = FeatureCallbackRunner(CallbackType.BEFORE_FEATURE, featureDescription.children.first(), featureReport, notifier)
+    private fun afterFeatureRunner() = FeatureCallbackRunner(CallbackType.AFTER_FEATURE, featureDescription.children.last(), featureReport, notifier)
 }

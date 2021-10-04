@@ -10,6 +10,7 @@ import com.networkedassets.gherkin.runner.gherkin.StepKeyword
 import com.networkedassets.gherkin.runner.metadata.RunnerMetadata
 import com.networkedassets.gherkin.runner.report.data.CallbackType
 import com.networkedassets.gherkin.runner.specification.FeatureSpecification
+import com.networkedassets.gherkin.runner.util.CallbackMapper.toAnnotation
 import groovy.lang.Closure
 import org.reflections.Reflections
 import java.lang.reflect.Method
@@ -50,25 +51,13 @@ object Reflection {
                 ?: throw NotFoundImplementationException("Step implementation not found for ${step.fullTree}")
     }
 
-    fun getCallbackMethod(featureSpecification: FeatureSpecification, callbackType: CallbackType): Method {
-        return when (callbackType) {
-            CallbackType.BEFORE_FEATURE -> getCallbackMethod(featureSpecification, BeforeFeature::class)
-            CallbackType.AFTER_FEATURE -> getCallbackMethod(featureSpecification, AfterFeature::class)
-            CallbackType.BEFORE_SCENARIO -> getCallbackMethod(featureSpecification, BeforeScenario::class)
-            CallbackType.AFTER_SCENARIO -> getCallbackMethod(featureSpecification, AfterScenario::class)
-        }
-    }
+    fun getCallbackMethod(featureSpecification: FeatureSpecification, callbackType: CallbackType) =
+        getCallbackMethod(featureSpecification, callbackType.toAnnotation())
 
-    private fun getCallbackMethod(featureSpecification: FeatureSpecification, annotationClass: KClass<out Annotation>): Method {
-        val callbackMethods = featureSpecification.javaClass.methods
-                .filter({ it.getAnnotation(annotationClass.java) != null })
-        if (callbackMethods.size > 1) {
-            throw MultipleImplementationsException("Multiple ${annotationClass.simpleName} callback implementations for ${featureSpecification::class.simpleName}")
-        } else if (callbackMethods.isEmpty()) {
-            throw NotFoundImplementationException("${annotationClass.simpleName} Callback implementation not found for ${featureSpecification::class.simpleName}")
-        }
-        return callbackMethods.first()
-    }
+
+    fun getCallbackMethods(featureSpecification: FeatureSpecification, callbackType: CallbackType): List<Method> =
+        featureSpecification.javaClass.methods.filter { it.getAnnotation(callbackType.toAnnotation().java) != null }
+            .also { if (it.isEmpty()) throw callbackImplementationNotFoundException(featureSpecification, callbackType.toAnnotation())}
 
     fun getGherkinRunnerMetadata(runnerClass: Class<*>): RunnerMetadata {
         try {
@@ -104,4 +93,19 @@ object Reflection {
     fun getElasticsearchReporting(runnerClass: Class<*>): ElasticSearchReporting? {
         return runnerClass.getAnnotation(ElasticSearchReporting::class.java)
     }
+
+    private fun getCallbackMethod(featureSpecification: FeatureSpecification, annotationClass: KClass<out Annotation>): Method {
+        val callbackMethods = featureSpecification.javaClass.methods
+            .filter { it.getAnnotation(annotationClass.java) != null }
+        if (callbackMethods.size > 1) {
+            throw MultipleImplementationsException("Multiple ${annotationClass.simpleName} callback implementations for ${featureSpecification::class.simpleName}")
+        } else if (callbackMethods.isEmpty()) {
+            throw callbackImplementationNotFoundException(featureSpecification, annotationClass)
+        }
+        return callbackMethods.first()
+    }
+
+    private fun callbackImplementationNotFoundException(featureSpecification: FeatureSpecification, annotationClass: KClass<out Annotation>) =
+        NotFoundImplementationException("${annotationClass.simpleName} Callback implementation not found for ${featureSpecification::class.simpleName}")
+
 }

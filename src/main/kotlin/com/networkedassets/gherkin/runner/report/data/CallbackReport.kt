@@ -1,6 +1,7 @@
 package com.networkedassets.gherkin.runner.report.data
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import mu.KLogger
 import org.apache.commons.lang3.exception.ExceptionUtils
 
 class CallbackReport(parent: ReportEntry) : ReportEntry(parent) {
@@ -13,6 +14,13 @@ class CallbackReport(parent: ReportEntry) : ReportEntry(parent) {
             ExceptionUtils.getStackTrace(thrownException)
         else null
 
+    fun decorate(log: KLogger, callbackName: String, function: () -> Unit) {
+        log.info("++ $callbackName")
+        start()
+        function()
+        log.info("Callback running finished for $callbackName\r\n")
+        end()
+    }
 
     fun passed() {
         state = ReportState.PASSED
